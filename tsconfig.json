@@ -1,4 +1,5 @@
 {
+  
   "compilerOptions": {
     "target": "ESNext",
     "useDefineForClassFields": true,
@@ -20,7 +21,8 @@
         "@pages/*": ["./src/pages/*"],
         "@sass/*": ["./src/sass/*"],
         "@hooks/*": ["./src/hooks/*"],
-        "@redux/*": ["./src/redux/*"]
+        "@redux/*": ["./src/redux/*"],
+        "@assets/*": ["./src/assets/*"]
     }
   },
   "include": ["src"],

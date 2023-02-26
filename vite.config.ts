@@ -13,7 +13,8 @@ export default defineConfig({
       { find: '@pages', replacement: path.resolve(__dirname, 'src/pages') },
       { find: '@sass', replacement: path.resolve(__dirname, 'src/sass') },
       { find: '@hooks', replacement: path.resolve(__dirname, 'src/hooks') },
-      { find: '@redux', replacement: path.resolve(__dirname, 'src/redux') }
+      { find: '@redux', replacement: path.resolve(__dirname, 'src/redux') },
+      { find: '@assets', replacement: path.resolve(__dirname, 'src/assets') }
     ],
   }
 })
