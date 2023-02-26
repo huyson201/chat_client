@@ -1,0 +1,86 @@
+@use "@sass/styles"as *;
+
+.about-user {
+    height: 100%;
+    width: $aboutUserWidth;
+    display: flex;
+    // justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    padding-top: 64px;
+    padding-left: 24px;
+    padding-right: 24px;
+
+}
+
+.avatar {
+    width: 100px;
+    height: 100px;
+    position: relative;
+
+    img {
+        width: 100%;
+        height: 100%;
+        border-radius: 50%;
+        object-fit: cover;
+    }
+}
+
+.dot {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 24px;
+    height: 24px;
+    border: 6px solid $white;
+    transform: translate(2px, 2px);
+}
+
+.name {
+    font-size: 20px;
+    font-weight: 900;
+    color: $black;
+    margin-top: 25px;
+}
+
+.activity {
+    font-size: 14px;
+    color: $black;
+    text-align: center;
+    font-weight: 400;
+    margin-top: 20px;
+}
+
+.socials {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 24px;
+    margin-top: 32px;
+
+}
+
+.social-links {
+    font-size: 16px;
+    color: $white;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+}
+
+.social-links.facebook-icons {
+    background: #3D5A96;
+}
+
+.social-links.twitter-icons {
+    background: #2AA3EF;
+
+}
+
+.social-links.instagram-icons {
+    background: linear-gradient(180.19deg, #7024C4 0.17%, #C21975 41.57%, #C74C4D 70.15%, #E09B3D 99.83%);
+
+}

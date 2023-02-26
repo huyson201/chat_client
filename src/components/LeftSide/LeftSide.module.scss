@@ -78,19 +78,7 @@
         justify-content: center;
     }
 
-    &__item svg {
-        fill: $gray-400;
-        transition: fill .3s ease;
 
-    }
-
-    &__item.active svg {
-        fill: $white;
-    }
-
-    &__item:hover svg {
-        fill: $white;
-    }
 }
 
 .side-settings {
@@ -101,9 +89,21 @@
     cursor: pointer;
     transition: fill .3s ease;
 
-    svg {
-        fill: $gray-400
-    }
+
+}
+
+.icons {
+    color: $gray-400;
+    font-size: 28px;
+    transition: color 0.3s ease;
+}
+
+.icons:hover {
+    color: $white;
+}
+
+.icons.active {
+    color: $white;
 }
 
 // .side-settings:hover svg {

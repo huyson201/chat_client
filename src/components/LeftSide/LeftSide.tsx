@@ -2,13 +2,9 @@ import React, { CSSProperties } from "react";
 import styles from "./LeftSide.module.scss";
 import bindClass from "classnames/bind";
 import avatar from "@assets/images/Userpic.jpg";
-import Home from "@components/icons/Home";
-import Send from "@components/icons/Send";
-import Inbox from "@components/icons/Inbox";
-import Users from "@components/icons/Users";
-import Notification from "@components/icons/Notification";
-import Settings from "@components/icons/Setting";
-
+import { AiFillHome } from "react-icons/ai"
+import { IoIosPaperPlane, IoIosSettings } from 'react-icons/io'
+import { FaUsers, FaBell } from 'react-icons/fa'
 const cx = bindClass.bind(styles);
 
 export interface CSSPropertiesWithVars extends CSSProperties {
@@ -24,34 +20,30 @@ const LeftSide = () => {
       </div>
       <ul className={cx("side-menu")} style={{ '--pos': '1' } as CSSPropertiesWithVars}>
         <li>
-          <a href="#" className={cx("side-menu__item", 'active')}>
-            <Home />
+          <a href="#" className={cx("side-menu__item", 'active', "icons")}>
+            <AiFillHome />
           </a>
         </li>
         <li>
-          <a href="#" className={cx("side-menu__item")}>
-            <Send />
+          <a href="#" className={cx("side-menu__item", "icons")}>
+            <IoIosPaperPlane />
+          </a>
+        </li>
+
+        <li>
+          <a href="#" className={cx("side-menu__item", "icons")}>
+            <FaUsers />
           </a>
         </li>
         <li>
-          <a href="#" className={cx("side-menu__item")}>
-            <Inbox />
-          </a>
-        </li>
-        <li>
-          <a href="#" className={cx("side-menu__item")}>
-            <Users />
-          </a>
-        </li>
-        <li>
-          <a href="#" className={cx("side-menu__item")}>
-            <Notification />
+          <a href="#" className={cx("side-menu__item", "icons")}>
+            <FaBell />
           </a>
         </li>
       </ul>
 
-      <button className={cx("side-settings")}>
-        <Settings />
+      <button className={cx("side-settings", "icons")}>
+        <IoIosSettings />
       </button>
     </div>
   );

@@ -4,12 +4,12 @@ import bindClass from 'classnames/bind'
 import avatar from '@assets/images/Userpic.jpg'
 import Phone from '@components/icons/Phone'
 import Camera from '@components/icons/Camera'
-import Emoji from '@components/icons/Emoji'
-import Micro from '@components/icons/Micro'
-import Send from '@components/icons/Send'
-import AttackFile from '@components/icons/AttackFile'
 import data from '@emoji-mart/data'
 import Picker from '@emoji-mart/react'
+import { ImAttachment } from 'react-icons/im'
+import { MdEmojiEmotions } from 'react-icons/md'
+import { IoIosPaperPlane } from 'react-icons/io'
+import { BsFillMicFill } from 'react-icons/bs'
 
 const cx = bindClass.bind(styles)
 const Chat = () => {
@@ -28,6 +28,8 @@ const Chat = () => {
             <div className={cx("header")}>
                 <div className={cx("avatar")}>
                     <img src={avatar} alt="avatar" />
+                    <div className={cx("dot-status", "online", "avt-dot")}></div>
+
                 </div>
                 <div className={cx("info")}>
                     <div className={cx("name")}>Tobias Williams</div>
@@ -152,19 +154,20 @@ const Chat = () => {
                         showSkinTones={false}
                         theme={"auto"}
                     />
-
                 </div>
                 <div className={cx("input-field")}>
                     <div className={cx("files")}>
                         <button className={cx('btn-action', 'btn-attack-file')}>
-                            <AttackFile />
+                            <ImAttachment />
                         </button>
                     </div>
                     <input type="text" placeholder='Type a message hear...' />
                     <div className={cx("buttons")}>
-                        <button className={cx('btn-action', 'btn-emoji', { show: showEmoji })} onClick={handleClickEmoji}><Emoji /></button>
-                        <button className={cx('btn-action', 'btn-mic')}><Micro /></button>
-                        <button className={cx('btn-action', 'btn-send')}> <Send /></button>
+                        <button className={cx('btn-action', 'btn-emoji', { show: showEmoji })} onClick={handleClickEmoji}>
+                            <MdEmojiEmotions />
+                        </button>
+                        <button className={cx('btn-action', 'btn-mic')}><BsFillMicFill /></button>
+                        <button className={cx('btn-action', 'btn-send')}> <IoIosPaperPlane /></button>
                     </div>
                 </div>
             </div>
