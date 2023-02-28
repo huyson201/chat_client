@@ -33,10 +33,13 @@ const Chat = ({ clickRightSide }: ChatProps) => {
 
     // handle click right sidebar button
     const handleClickRightSide = () => {
-        setSidebarState(prev => !prev)
-        if (clickRightSide) {
-            clickRightSide(sidebarState)
-        }
+        setSidebarState(prev => {
+            if (clickRightSide) {
+                clickRightSide(!prev)
+            }
+            return !prev
+        })
+
     }
 
     return (
