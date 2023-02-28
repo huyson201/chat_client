@@ -2,27 +2,43 @@ import React, { useState, MouseEvent } from 'react'
 import styles from './Chat.module.scss'
 import bindClass from 'classnames/bind'
 import avatar from '@assets/images/Userpic.jpg'
-import Phone from '@components/icons/Phone'
-import Camera from '@components/icons/Camera'
 import data from '@emoji-mart/data'
 import Picker from '@emoji-mart/react'
 import { ImAttachment } from 'react-icons/im'
 import { MdEmojiEmotions } from 'react-icons/md'
 import { IoIosPaperPlane } from 'react-icons/io'
-import { BsFillMicFill } from 'react-icons/bs'
+import { BsFillMicFill, BsLayoutSidebarInsetReverse } from 'react-icons/bs'
+import { HiPhone, HiVideoCamera } from 'react-icons/hi'
 
 const cx = bindClass.bind(styles)
-const Chat = () => {
-    const [showEmoji, setShowEmoji] = useState<boolean>(false)
 
+interface ChatProps {
+    clickRightSide?: (clickState: boolean) => void
+}
+const Chat = ({ clickRightSide }: ChatProps) => {
+    const [showEmoji, setShowEmoji] = useState<boolean>(false)
+    const [sidebarState, setSidebarState] = useState<boolean>(false)
+
+
+    // handle click emoji icon to show, hide emoji picker
     const handleClickEmoji = (e: MouseEvent) => {
         e.stopPropagation()
         setShowEmoji(prev => !prev)
     }
 
+    //  hide emoji picker if click outside
     const handleClickOutSideEmoji = () => {
         setShowEmoji(false)
     }
+
+    // handle click right sidebar button
+    const handleClickRightSide = () => {
+        setSidebarState(prev => !prev)
+        if (clickRightSide) {
+            clickRightSide(sidebarState)
+        }
+    }
+
     return (
         <div className={cx("chat-box")}>
             <div className={cx("header")}>
@@ -40,8 +56,9 @@ const Chat = () => {
                     </div>
                 </div>
                 <div className={cx("actions")}>
-                    <button className={cx("call")}><Phone /></button>
-                    <button className={cx("video-call")}><Camera /></button>
+                    <button className={cx("call")}><HiPhone /></button>
+                    <button className={cx("video-call")}><HiVideoCamera /></button>
+                    <button className={cx("sidebar-right", { active: sidebarState })} onClick={handleClickRightSide}><BsLayoutSidebarInsetReverse /></button>
                 </div>
             </div>
             <div className={cx("chat-content")}>

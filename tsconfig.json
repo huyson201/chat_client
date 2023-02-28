@@ -1,5 +1,4 @@
 {
-  
   "compilerOptions": {
     "target": "ESNext",
     "useDefineForClassFields": true,
@@ -22,9 +21,11 @@
         "@sass/*": ["./src/sass/*"],
         "@hooks/*": ["./src/hooks/*"],
         "@redux/*": ["./src/redux/*"],
-        "@assets/*": ["./src/assets/*"]
+        "@assets/*": ["./src/assets/*"],
+        "@apis/*": ["./src/apis/*"],
     }
   },
   "include": ["src"],
-  "references": [{ "path": "./tsconfig.node.json" }]
+  "references": [{ "path": "./tsconfig.node.json" }],
+  "files": ["custom.d.ts"]
 }

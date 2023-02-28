@@ -3,8 +3,9 @@ import styles from "./LeftSide.module.scss";
 import bindClass from "classnames/bind";
 import avatar from "@assets/images/Userpic.jpg";
 import { AiFillHome } from "react-icons/ai"
-import { IoIosPaperPlane, IoIosSettings } from 'react-icons/io'
-import { FaUsers, FaBell } from 'react-icons/fa'
+import { FaUserFriends, FaBell } from 'react-icons/fa'
+import { GoSignOut } from 'react-icons/go'
+import { useAppSelector } from "@hooks/redux";
 const cx = bindClass.bind(styles);
 
 export interface CSSPropertiesWithVars extends CSSProperties {
@@ -12,11 +13,14 @@ export interface CSSPropertiesWithVars extends CSSProperties {
   // any other vars you may use
 }
 const LeftSide = () => {
+
+  const auth = useAppSelector(state => state.auth)
+
   return (
     <div className={cx("left-side")}>
       <div className={cx("avatar")}>
-        <img src={avatar} alt="avatar" />
-        <div className={cx("dot-status", "online", "status")}></div>
+        <img src={auth.profile?.avatar_url} alt="avatar" />
+        <div className={cx("dot-status", auth.profile?.online_status, "status")}></div>
       </div>
       <ul className={cx("side-menu")} style={{ '--pos': '1' } as CSSPropertiesWithVars}>
         <li>
@@ -24,15 +28,10 @@ const LeftSide = () => {
             <AiFillHome />
           </a>
         </li>
-        <li>
-          <a href="#" className={cx("side-menu__item", "icons")}>
-            <IoIosPaperPlane />
-          </a>
-        </li>
 
         <li>
           <a href="#" className={cx("side-menu__item", "icons")}>
-            <FaUsers />
+            <FaUserFriends />
           </a>
         </li>
         <li>
@@ -42,8 +41,8 @@ const LeftSide = () => {
         </li>
       </ul>
 
-      <button className={cx("side-settings", "icons")}>
-        <IoIosSettings />
+      <button className={cx("side-signOut", "icons")}>
+        <GoSignOut />
       </button>
     </div>
   );

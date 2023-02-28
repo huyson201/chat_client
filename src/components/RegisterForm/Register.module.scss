@@ -1,0 +1,14 @@
+@import "@components/LoginForm/LoginForm.module.scss";
+
+.register-form {
+    @extend .login-form;
+}
+
+.input-row {
+    display: flex;
+    gap: 12px;
+}
+
+.login-link {
+    @extend .sign-up__link;
+}

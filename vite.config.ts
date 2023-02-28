@@ -14,7 +14,9 @@ export default defineConfig({
       { find: '@sass', replacement: path.resolve(__dirname, 'src/sass') },
       { find: '@hooks', replacement: path.resolve(__dirname, 'src/hooks') },
       { find: '@redux', replacement: path.resolve(__dirname, 'src/redux') },
-      { find: '@assets', replacement: path.resolve(__dirname, 'src/assets') }
+      { find: '@assets', replacement: path.resolve(__dirname, 'src/assets') },
+      { find: '@apis', replacement: path.resolve(__dirname, 'src/apis') },
+
     ],
   }
 })
