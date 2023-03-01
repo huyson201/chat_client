@@ -22,6 +22,8 @@ const refreshToken = () => {
 //     return response.data.data
 // }))
 
+let refreshTokenPromise: Promise<AxiosResponse<any>> | null = null
+
 axiosInstance.interceptors.response.use(
     (response) => {
         return response
@@ -33,7 +35,17 @@ axiosInstance.interceptors.response.use(
             let { status } = error.response
             if (status && status === 401 && !originalConfig._retry) {
                 originalConfig._retry = true;
-                return refreshToken().then(() => axios(originalConfig)).catch(err => Promise.reject(err))
+                refreshTokenPromise = refreshTokenPromise !== null ? refreshTokenPromise : refreshToken()
+                try {
+                    await refreshTokenPromise
+                    return axios(originalConfig)
+                } catch (error) {
+                    return Promise.reject(error)
+                }
+                finally {
+                    refreshTokenPromise = null
+                }
+
             }
         }
 

@@ -1,6 +1,6 @@
 import authApis from '@apis/auth.api'
 import { useAppDispatch, useAppSelector } from '@hooks/redux'
-import { setProfile } from '@redux/slices/Auth.slice'
+import { loginFail, loginSuccess } from '@redux/slices/Auth.slice'
 import axios, { AxiosError } from 'axios'
 import React, { useEffect } from 'react'
 import { Navigate, useNavigate } from 'react-router-dom'
@@ -18,27 +18,29 @@ const PrivateRoute = ({ children }: PrivateRouteProps) => {
         const fetch = async () => {
             try {
                 let res = await authApis.getProfile()
-                dispatch(setProfile(res.data.data))
+                dispatch(loginSuccess(res.data.data))
             } catch (error: any) {
+                dispatch(loginFail())
                 navigate("/login", {
                     replace: true
                 })
             }
         }
 
-        if (auth.isLoggedIn === null) {
+        if (auth.isPending) {
             fetch()
         }
+
     }, [])
 
-    if (!auth.isLoggedIn === null && auth.isLoggedIn === false) {
-        return <Navigate to={"/login"} replace />
-    }
-
-    if (auth.isLoggedIn === null) {
+    if (auth.isPending) {
         return <div>
             loading...
         </div>
+    }
+
+    if (!auth.isPending && !auth.isLoggedIn) {
+        return <Navigate to={"/login"} replace />
     }
 
     return (

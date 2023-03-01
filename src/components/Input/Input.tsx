@@ -12,7 +12,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(({ fieldClassName, error,
     return (
         <div className={cx("input-field", { [`${fieldClassName}`]: fieldClassName, error: error })}>
             <input {...props} ref={ref} />
-            <div className={cx("feedback")}>{error}</div>
+            {/* <div className={cx("feedback")}>{error}</div> */}
         </div>
     )
 

@@ -101,3 +101,18 @@
 .sign-up__link {
     color: #3B5998;
 }
+
+.feedback {
+    font-size: 12px;
+    display: none;
+    margin-top: 6px;
+}
+
+.feedback.error {
+    color: $red;
+
+}
+
+.feedback.show {
+    display: block;
+}

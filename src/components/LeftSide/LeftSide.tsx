@@ -5,7 +5,10 @@ import avatar from "@assets/images/Userpic.jpg";
 import { AiFillHome } from "react-icons/ai"
 import { FaUserFriends, FaBell } from 'react-icons/fa'
 import { GoSignOut } from 'react-icons/go'
-import { useAppSelector } from "@hooks/redux";
+import { useAppDispatch, useAppSelector } from "@hooks/redux";
+import { useNavigate } from "react-router-dom";
+import authApis from "@apis/auth.api";
+import { logOut } from "@redux/slices/Auth.slice";
 const cx = bindClass.bind(styles);
 
 export interface CSSPropertiesWithVars extends CSSProperties {
@@ -15,6 +18,16 @@ export interface CSSPropertiesWithVars extends CSSProperties {
 const LeftSide = () => {
 
   const auth = useAppSelector(state => state.auth)
+  const dispatch = useAppDispatch()
+  const navigate = useNavigate()
+  const handleLogout = () => {
+    authApis.logout()
+      .then(() => {
+        dispatch(logOut())
+        navigate("/login", { replace: true })
+      })
+      .catch(err => console.log(err))
+  }
 
   return (
     <div className={cx("left-side")}>
@@ -41,7 +54,7 @@ const LeftSide = () => {
         </li>
       </ul>
 
-      <button className={cx("side-signOut", "icons")}>
+      <button className={cx("side-signOut", "icons")} onClick={handleLogout}>
         <GoSignOut />
       </button>
     </div>

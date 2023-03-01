@@ -1,6 +1,7 @@
-export interface ApiResponse<T> {
+export interface ApiResponse<T, U = {}> {
     message?: string,
     success?: boolean,
     data: T,
-    errors?: any
+    error?: U
 }
+

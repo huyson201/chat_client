@@ -15,20 +15,13 @@
 
 
 
-.feedback {
-    font-size: 12px;
-    margin-top: 6px;
-}
-
 .input-field.error {
     input {
         border: 1px solid $red;
         color: $red;
     }
 
-    .feedback {
-        color: $red;
-    }
+
 }
 
 .input-field:not(.error) .feedback {

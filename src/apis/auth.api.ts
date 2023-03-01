@@ -8,8 +8,14 @@ const authApis = {
             email, password
         })
     },
+    register: (data: { first_name: string, last_name: string, email: string, password: string, confirmPassword: string }) => {
+        return axiosInstance.post<ApiResponse<Auth>>("/auth/register", data)
+    },
     getProfile: () => {
         return axiosInstance.get<ApiResponse<Auth>>("/auth/profile")
+    },
+    logout: () => {
+        return axiosInstance.post("/auth/logout")
     }
 }
 

@@ -3,7 +3,7 @@ import App from "../App";
 import Home from "@pages/Home/Home";
 import LoginRegister from "@pages/LoginRegister/LoginRegister";
 import LoginForm from "@components/LoginForm/LoginForm";
-import RegisterFom from "@components/RegisterForm/RegisterFom";
+import RegisterFom from "@components/RegisterForm/RegisterForm";
 import PrivateRoute from "@components/PrivateRoute/PrivateRoute";
 
 const routes = createBrowserRouter([
