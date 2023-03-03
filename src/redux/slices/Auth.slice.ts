@@ -17,7 +17,7 @@ const initialState: AuthState = {
     isPending: false
 }
 
-export const counterSlice = createSlice({
+export const authSlice = createSlice({
     name: 'auth',
     // `createSlice` will infer the state type from the `initialState` argument
     initialState,
@@ -33,6 +33,11 @@ export const counterSlice = createSlice({
         loginFail: (state) => {
             state.isPending = false
         },
+        updateOnlineStatus: (state, action: PayloadAction<"online" | "offline">) => {
+            if (state.profile) {
+                state.profile.online_status = action.payload
+            }
+        },
         setProfile: (state, payload: PayloadAction<Auth>) => {
             state.profile = payload.payload
             state.isLoggedIn = true
@@ -45,9 +50,9 @@ export const counterSlice = createSlice({
     },
 })
 
-export const { loginSuccess, login, loginFail, setProfile, logOut } = counterSlice.actions
+export const { loginSuccess, login, loginFail, setProfile, logOut, updateOnlineStatus } = authSlice.actions
 
 // Other code such as selectors can use the imported `RootState` type
 export const selectAuth = (state: RootState) => state.auth
 
-export default counterSlice.reducer
+export default authSlice.reducer

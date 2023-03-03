@@ -1,4 +1,4 @@
-import React, { useState, MouseEvent } from 'react'
+import React, { useState, MouseEvent, useMemo } from 'react'
 import styles from './Chat.module.scss'
 import bindClass from 'classnames/bind'
 import avatar from '@assets/images/Userpic.jpg'
@@ -9,6 +9,7 @@ import { MdEmojiEmotions } from 'react-icons/md'
 import { IoIosPaperPlane } from 'react-icons/io'
 import { BsFillMicFill, BsLayoutSidebarInsetReverse } from 'react-icons/bs'
 import { HiPhone, HiVideoCamera } from 'react-icons/hi'
+import { useAppSelector } from '@hooks/redux'
 
 const cx = bindClass.bind(styles)
 
@@ -18,7 +19,25 @@ interface ChatProps {
 const Chat = ({ clickRightSide }: ChatProps) => {
     const [showEmoji, setShowEmoji] = useState<boolean>(false)
     const [sidebarState, setSidebarState] = useState<boolean>(false)
+    const chatConversation = useAppSelector(state => state.chat)
+    const auth = useAppSelector(state => state.auth.profile)
 
+    const conversationInfo = useMemo(() => {
+        let conversationInfo: any = {}
+
+        if (!chatConversation.currentChat?.is_group) {
+            let friend = chatConversation.currentChat?.members.find(item => item._id !== auth?._id)
+            conversationInfo.name = `${friend?.first_name} ${friend?.last_name}`
+            conversationInfo.avatar = friend?.avatar_url
+            conversationInfo.isOnline = friend?.online_status === "online" ? true : false
+
+            return conversationInfo
+        }
+        conversationInfo.name = chatConversation.currentChat.name
+        conversationInfo.isOnline = chatConversation.currentChat?.members.some(member => member.online_status === "online")
+
+        return conversationInfo
+    }, [chatConversation.currentChat])
 
     // handle click emoji icon to show, hide emoji picker
     const handleClickEmoji = (e: MouseEvent) => {
@@ -26,7 +45,7 @@ const Chat = ({ clickRightSide }: ChatProps) => {
         setShowEmoji(prev => !prev)
     }
 
-    //  hide emoji picker if click outside
+    //  hide emoji picker if click outsidez
     const handleClickOutSideEmoji = () => {
         setShowEmoji(false)
     }
@@ -46,16 +65,18 @@ const Chat = ({ clickRightSide }: ChatProps) => {
         <div className={cx("chat-box")}>
             <div className={cx("header")}>
                 <div className={cx("avatar")}>
-                    <img src={avatar} alt="avatar" />
-                    <div className={cx("dot-status", "online", "avt-dot")}></div>
-
+                    <img src={conversationInfo.avatar || avatar} alt="avatar" />
+                    <div className={cx("dot-status", { "online": conversationInfo.isOnline }, "avt-dot")}></div>
                 </div>
                 <div className={cx("info")}>
-                    <div className={cx("name")}>Tobias Williams</div>
+                    <div className={cx("name")}>{conversationInfo.name || ''}</div>
                     <div className={cx("online-status")}>
-                        <span>Offline</span>
-                        <span className={cx("dot")}></span>
-                        <span className="last-seen">Last seen 3 hours ago</span>
+                        {conversationInfo.isOnline ? "Active now" : <>
+                            <span>Offline</span>
+                            <span className={cx("dot")}></span>
+                            <span className="last-seen">Last seen 3 hours ago</span>
+                        </>}
+
                     </div>
                 </div>
                 <div className={cx("actions")}>

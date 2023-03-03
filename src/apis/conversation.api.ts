@@ -1,9 +1,11 @@
+import { ApiResponse } from "../types/common"
+import { ConversationsResponse } from "../types/conversation"
 import axiosInstance from "./axiosInstance"
 
-const authApis = {
+const conversationApi = {
     getConversations: () => {
-        return axiosInstance.get("/users/conversations")
+        return axiosInstance.get<ApiResponse<ConversationsResponse>>("/users/conversations")
     }
 }
 
-export default authApis
+export default conversationApi
