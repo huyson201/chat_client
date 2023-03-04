@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
 import styles from "./Home.module.scss";
-
 import bindClass from "classnames/bind";
 import LeftSide from "@components/LeftSide/LeftSide";
 import Dialogues from "@components/Dialogues/Dialogues";
@@ -12,6 +11,8 @@ import axiosInstance from "@apis/axiosInstance";
 import { useAppDispatch, useAppSelector } from "@hooks/redux";
 import { updateOnlineStatus } from "@redux/slices/Auth.slice";
 import { disconnectSocket, setSocket } from "@redux/slices/Socket.slice";
+import { addMessage } from "@redux/slices/Message.slice";
+import { MessageType } from "../../types/Message";
 
 
 
@@ -20,7 +21,7 @@ const Home = () => {
   const [showSidebar, setShowSidebar] = useState<boolean>(false)
   const dispatch = useAppDispatch()
   const auth = useAppSelector(state => state.auth)
-  const conversations = useAppSelector(state => state.conversation)
+
   const handleFriendOnline = () => {
 
   }
@@ -65,6 +66,13 @@ const Home = () => {
         }
       });
 
+      //* register receive message
+      socket.on("receiveMessage", (msg: MessageType) => {
+        dispatch(addMessage(msg))
+      })
+
+
+
     }
 
     return () => {
@@ -72,11 +80,15 @@ const Home = () => {
         socket.off('connect');
         socket.off('disconnect');
         socket.off("connect_error")
+        socket.off("update_onlineStatus")
+        socket.off("receiveMessage")
         socket.disconnect()
         dispatch(disconnectSocket())
       }
     };
   }, [auth.isLoggedIn])
+
+
   return (
     <div className={cx("home")}>
       <LeftSide />

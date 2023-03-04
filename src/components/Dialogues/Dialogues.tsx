@@ -10,6 +10,7 @@ import { Link } from 'react-router-dom'
 import { ConversationType } from '../../types/conversation'
 import { setCurrentChatAndChat } from '@redux/slices/Chat.slice'
 const cx = bindClass.bind(style)
+
 const Dialogues = () => {
     const disPatch = useAppDispatch()
     const conversations = useAppSelector(state => state.conversation)
@@ -157,6 +158,22 @@ export interface DialoguesItemType {
 }
 
 const DialoguesItem = ({ conversation, authId, onClick }: DialoguesItemType) => {
+
+    const socket = useAppSelector(state => state.socket.socket)
+
+    useEffect(() => {
+        if (conversation.is_group && socket) {
+            socket.emit("joinConversation", conversation)
+        }
+
+        return () => {
+            if (conversation.is_group && socket) {
+                socket.emit("leaveConversation", conversation)
+            }
+        }
+
+    }, [socket])
+
     let friend = useMemo(() => {
         return conversation.members?.filter(fr => fr._id !== authId)
     }, [conversation])
@@ -183,7 +200,7 @@ const DialoguesItem = ({ conversation, authId, onClick }: DialoguesItemType) => 
                     <div className={cx("online-time")}>3h ago</div>
                 </div>
                 <div className={cx("message-box")}>
-                    <div className={cx("message")}>Analysis of foreign experience, as it is commo…</div>
+                    <div className={cx("message")}>{conversation.lastMessage?.content}</div>
                     {/* <div className={cx("count")}>2</div> */}
                 </div>
             </div>
