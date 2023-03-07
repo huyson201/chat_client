@@ -2,9 +2,7 @@ import React, { useEffect, useState } from "react";
 import styles from "./Home.module.scss";
 import bindClass from "classnames/bind";
 import LeftSide from "@components/LeftSide/LeftSide";
-import Dialogues from "@components/Dialogues/Dialogues";
-import Chat from "@components/Chat/Chat";
-import About from "@components/About/About";
+
 const cx = bindClass.bind(styles);
 import io, { Socket } from 'socket.io-client';
 import axiosInstance from "@apis/axiosInstance";
@@ -13,14 +11,18 @@ import { updateOnlineStatus } from "@redux/slices/Auth.slice";
 import { disconnectSocket, setSocket } from "@redux/slices/Socket.slice";
 import { addMessage } from "@redux/slices/Message.slice";
 import { MessageType } from "../../types/Message";
+import { updateLastMessage } from "@redux/slices/Conversation.slice";
+import { Outlet } from "react-router-dom";
+import List from "@components/List/List";
+// import ListItemContent from "@components/ListItemContent/ListItemContent";
 
 
 
 let socket: Socket
 const Home = () => {
-  const [showSidebar, setShowSidebar] = useState<boolean>(false)
   const dispatch = useAppDispatch()
   const auth = useAppSelector(state => state.auth)
+  const currentChat = useAppSelector(state => state.chat.currentChat)
 
   const handleFriendOnline = () => {
 
@@ -68,7 +70,14 @@ const Home = () => {
 
       //* register receive message
       socket.on("receiveMessage", (msg: MessageType) => {
-        dispatch(addMessage(msg))
+        if (currentChat && currentChat._id === msg.conversation) {
+          dispatch(addMessage(msg))
+          dispatch(updateLastMessage({ conversationId: msg.conversation, lastMessage: { sender: msg.sender._id || msg.sender, content: msg.content } }))
+        }
+        else {
+          dispatch(updateLastMessage({ conversationId: msg.conversation, lastMessage: { sender: msg.sender._id || msg.sender, content: msg.content } }))
+        }
+
       })
 
 
@@ -92,9 +101,13 @@ const Home = () => {
   return (
     <div className={cx("home")}>
       <LeftSide />
-      <Dialogues />
-      <Chat clickRightSide={(state) => setShowSidebar(state)} />
-      {showSidebar && <About />}
+      <div className={cx("common")}>
+        <Outlet />
+        {/* <List />
+        <ListItemContent /> */}
+
+      </div>
+
     </div>
   );
 };

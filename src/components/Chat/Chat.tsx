@@ -1,4 +1,4 @@
-import React, { useState, MouseEvent, useMemo, useEffect, ChangeEvent, useRef } from 'react'
+import React, { useState, MouseEvent, useMemo, useEffect, ChangeEvent, useRef, KeyboardEvent } from 'react'
 import styles from './Chat.module.scss'
 import bindClass from 'classnames/bind'
 import avatar from '@assets/images/Userpic.jpg'
@@ -7,7 +7,7 @@ import Picker from '@emoji-mart/react'
 import { ImAttachment } from 'react-icons/im'
 import { MdEmojiEmotions } from 'react-icons/md'
 import { IoIosPaperPlane } from 'react-icons/io'
-import { BsFillMicFill, BsLayoutSidebarInsetReverse } from 'react-icons/bs'
+import { BsClock, BsFillMicFill, BsLayoutSidebarInsetReverse } from 'react-icons/bs'
 import { HiPhone, HiVideoCamera } from 'react-icons/hi'
 import { useAppDispatch, useAppSelector } from '@hooks/redux'
 import { MessageType } from '../../types/Message'
@@ -16,6 +16,7 @@ import { Socket } from 'socket.io-client'
 import { setMessages } from '@redux/slices/Message.slice'
 import { format } from "timeago.js"
 import { User } from '../../types/conversation'
+import ContentEditable, { ContentEditableEvent } from 'react-contenteditable'
 
 const cx = bindClass.bind(styles)
 
@@ -26,7 +27,8 @@ interface ChatProps {
 interface ConversationInfo {
     name?: string,
     isOnline?: boolean,
-    avatar?: string
+    avatar?: string | string[],
+    is_group: boolean
 }
 const Chat = ({ clickRightSide }: ChatProps) => {
     const scrollRef = useRef<HTMLDivElement>(null)
@@ -39,7 +41,8 @@ const Chat = ({ clickRightSide }: ChatProps) => {
     const [receivers, setReceivers] = useState<User | User[] | undefined>([])
     const [conversationInfo, setConversationInfo] = useState<ConversationInfo>({
         name: "",
-        isOnline: false
+        isOnline: false,
+        is_group: false
     })
     const chatConversation = useAppSelector(state => state.chat)
     const auth = useAppSelector(state => state.auth.profile)
@@ -64,12 +67,13 @@ const Chat = ({ clickRightSide }: ChatProps) => {
              ** name, avatar, online statue, receiver
              */
             if (!chatConversation.currentChat.is_group) {
-                let friend = chatConversation.currentChat?.members.find(item => item._id !== auth?._id)
+                let friend = chatConversation.currentChat.members.find(item => item._id !== auth?._id)
                 // get conversation info
                 setConversationInfo({
                     name: `${friend?.first_name} ${friend?.last_name}`,
                     avatar: friend?.avatar_url,
-                    isOnline: friend?.online_status === "online" ? true : false
+                    isOnline: friend?.online_status === "online" ? true : false,
+                    is_group: false
                 })
 
                 setReceivers(friend)
@@ -78,6 +82,8 @@ const Chat = ({ clickRightSide }: ChatProps) => {
                 setConversationInfo({
                     name: chatConversation.currentChat.name,
                     isOnline: chatConversation.currentChat.members.some(fr => fr.online_status === "online"),
+                    is_group: true,
+                    avatar: chatConversation.currentChat.members.map(mem => mem.avatar_url)
                 })
             }
 
@@ -86,22 +92,7 @@ const Chat = ({ clickRightSide }: ChatProps) => {
 
     }, [chatConversation.currentChat])
 
-    // // register receiveMessage
-    // useEffect(() => {
-    //     let parseSocket = socket as Socket
-    //     if (!parseSocket) return
-    //     console.log("register receiveMsg")
 
-    //     parseSocket.on("receiveMessage", (msg: MessageType) => {
-    //         dispatch(addMessage(msg))
-    //     })
-
-
-    //     return () => {
-    //         parseSocket.off("receiveMessage")
-    //     }
-
-    // }, [chatConversation.currentChat, socket])
 
 
     useEffect(() => {
@@ -114,10 +105,7 @@ const Chat = ({ clickRightSide }: ChatProps) => {
         setShowEmoji(prev => !prev)
     }
 
-    //  hide emoji picker if click outsidez
-    const handleClickOutSideEmoji = () => {
-        setShowEmoji(false)
-    }
+
 
     // handle click right sidebar button
     const handleClickRightSide = () => {
@@ -157,36 +145,17 @@ const Chat = ({ clickRightSide }: ChatProps) => {
         }
         setTypingMessage("")
     }
+
     return (
         <div className={cx("chat-box")}>
-            <div className={cx("header")}>
-                <div className={cx("avatar")}>
-                    <img src={conversationInfo.avatar || avatar} alt="avatar" />
-                    <div className={cx("dot-status", { "online": conversationInfo.isOnline }, "avt-dot")}></div>
-                </div>
-                <div className={cx("info")}>
-                    <div className={cx("name")}>{conversationInfo.name || ''}</div>
-                    <div className={cx("online-status")}>
-                        {conversationInfo.isOnline ? "Active now" : <>
-                            <span>Offline</span>
-                            <span className={cx("dot")}></span>
-                            <span className="last-seen">Last seen 3 hours ago</span>
-                        </>}
-
-                    </div>
-                </div>
-                <div className={cx("actions")}>
-                    <button className={cx("call")}><HiPhone /></button>
-                    <button className={cx("video-call")}><HiVideoCamera /></button>
-                    <button className={cx("sidebar-right", { active: sidebarState })} onClick={handleClickRightSide}><BsLayoutSidebarInsetReverse /></button>
-                </div>
-            </div>
+            <ChatHeader conversationInfo={conversationInfo} handleClickRightSide={handleClickRightSide} active={sidebarState} />
             <div className={cx("chat-content")}>
                 {genMessages()}
                 <div style={{ float: "left", clear: "both" }} ref={scrollRef}></div>
             </div>
+            <ChatInput />
 
-            <div className={cx("send-message")} >
+            {/* <div className={cx("send-message")} >
                 <div className={cx("emoji-picker", { "show": showEmoji })}>
                     <Picker
                         onClickOutside={handleClickOutSideEmoji}
@@ -217,36 +186,186 @@ const Chat = ({ clickRightSide }: ChatProps) => {
                         <button onClick={handleSendMsg} className={cx('btn-action', 'btn-send')}> <IoIosPaperPlane /></button>
                     </div>
                 </div>
-            </div>
+            </div> */}
         </div>
     )
 }
 
+/**
+ ** Message Item components
+ */
 export interface MessageItemProps {
     msgType: "my-msg" | "friend-msg",
     message: MessageType
 }
+
 export const MessageItem = ({ message, msgType = "my-msg" }: MessageItemProps) => {
     return (
         <div className={cx("message", msgType)}>
-            <div className={cx("box")}>
-                <div className={cx("message-content")}>
-                    {message.content}
-                    <div className={cx("curve")}>
-                        <svg width="30" height="14" viewBox="0 0 30 14" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M21.0004 1.1951C21.3383 2.57777 22.8564 6.57786 29.5138 10.9208C29.8564 11.1444 30.0225 11.5367 29.937 11.9215C29.8515 12.306 29.5307 12.6103 29.1192 12.6975C29.0819 12.7054 28.1853 12.8928 26.5754 13.0336C21.9849 13.4352 12.5296 13.4087 0.56729 8.76526C-0.31396 8.88622 25.4393 -1.80179 21.0004 1.1951Z" />
-                        </svg>
-
+            <div className={cx("message-box")}>
+                {msgType === "friend-msg" && <div className={cx("sender")}>{`${message.sender.first_name} ${message.sender.last_name}`} </div>}
+                <div className={cx("box")}>
+                    <div className={cx("message-content")}>
+                        {message.content}
                     </div>
-                </div>
-                <div className={cx("message-times")}>
-                    {format(message.createdAt.toString())}
-                    {/* Yesterday 14:38 PM */}
-                </div>
+                    <div className={cx("message-times")}>
+                        <BsClock className={cx("clock")} />
+                        {format(message.createdAt.toString())}
+                    </div>
 
+                </div>
             </div>
         </div>
     )
 }
 
+
+/**
+ ** Chat Header Component
+ */
+export interface ChatHeaderProps {
+    conversationInfo: ConversationInfo
+    active: boolean,
+    handleClickRightSide: () => void
+}
+
+const ChatHeader = ({ conversationInfo, active, handleClickRightSide }: ChatHeaderProps) => {
+
+    return (
+        <div className={cx("header")}>
+            {conversationInfo.is_group ? (
+                <div className={cx("avatar", "group-avatar", `member-${conversationInfo.avatar?.length}`)}>
+                    {
+                        Array.isArray(conversationInfo.avatar) && conversationInfo.avatar.map(url => {
+                            return (
+                                <img key={url} src={url} alt="avatar" />
+                            )
+                        })
+                    }
+                    <div className={cx("dot-status", { "online": conversationInfo.isOnline }, "avt-dot")}></div>
+                </div>
+            ) : (
+                <div className={cx("avatar")}>
+                    {
+                        !Array.isArray(conversationInfo.avatar) && <img src={conversationInfo.avatar} alt="avatar" />
+                    }
+
+                    <div className={cx("dot-status", { "online": conversationInfo.isOnline }, "avt-dot")}></div>
+                </div>
+            )}
+
+            <div className={cx("info")}>
+                <div className={cx("name")}>{conversationInfo.name || ''}</div>
+                <div className={cx("online-status")}>
+                    {conversationInfo.isOnline ? "Active now" : <>
+                        <span>Offline</span>
+                        <span className={cx("dot")}></span>
+                        <span className="last-seen">Last seen 3 hours ago</span>
+                    </>}
+
+                </div>
+            </div>
+            <div className={cx("actions")}>
+                <button className={cx("call")}><HiPhone /></button>
+                <button className={cx("video-call")}><HiVideoCamera /></button>
+                <button className={cx("sidebar-right", { active })} onClick={handleClickRightSide}><BsLayoutSidebarInsetReverse /></button>
+            </div>
+        </div>
+    )
+}
+
+
+/**
+ ** ChatInput components
+ */
+export interface ChatInputProps {
+    handleSendMsg?: (message: string) => void
+}
+
+const ChatInput = ({ handleSendMsg }: ChatInputProps) => {
+    const emojiPickerRef = useRef<HTMLDivElement>(null)
+    const [showEmoji, setShowEmoji] = useState<boolean>(false)
+    const [typingMessage, setTypingMessage] = useState<string>("")
+
+    const handleClickEmoji = (e: MouseEvent) => {
+        e.stopPropagation()
+
+        setShowEmoji(prev => !prev)
+    }
+
+    //handle type message
+    const handleChange = (event: ContentEditableEvent) => {
+        const newValue = event.target.value;
+
+        if (event.currentTarget.scrollHeight >= 140) {
+            event.currentTarget.style.overflowY = 'scroll'
+        }
+        else {
+            event.currentTarget.style.overflowY = 'visible'
+        }
+
+        if (!newValue || newValue === '') {
+            event.currentTarget.setAttribute("data-placeholder", 'Aa')
+        }
+        else {
+            event.currentTarget.setAttribute("data-placeholder", '')
+        }
+        setTypingMessage(newValue);
+        if (handleSendMsg) {
+            handleSendMsg(newValue);
+        }
+    };
+
+    //  hide emoji picker if click outsidez
+    const handleClickOutSideEmoji = () => {
+        setShowEmoji(false)
+    }
+
+    return (
+        <div className={cx("send-message")} >
+            <div className={cx("files")}>
+                <button className={cx('btn-action', 'btn-attack-file')}>
+                    <ImAttachment />
+                </button>
+            </div>
+            <div className={cx("editable-box")}>
+                <ContentEditable
+                    onChange={handleChange}
+                    disabled={false}
+                    html={typingMessage}
+                    tagName='div'
+                    className={cx("input-field")}
+                    data-placeholder='Aa'
+
+
+                />
+            </div>
+            <div className={cx("buttons")}>
+                <div className={cx("emoji-box")}>
+                    <div ref={emojiPickerRef} className={cx("emoji-picker", { "show": showEmoji })}>
+                        <Picker
+                            onClickOutside={handleClickOutSideEmoji}
+                            navPosition={"bottom"}
+                            locale="vi"
+                            perLine={11}
+                            maxFrequentRows={1}
+                            previewPosition={"none"}
+                            data={data}
+                            onEmojiSelect={console.log}
+                            showPreview={false}
+                            showSkinTones={false}
+                            theme={"auto"}
+                        />
+                    </div>
+                    <button className={cx('btn-action', 'btn-emoji', { show: showEmoji })} onClick={handleClickEmoji}>
+                        <MdEmojiEmotions />
+                    </button>
+                </div>
+
+                {/* <button className={cx('btn-action', 'btn-mic')}><BsFillMicFill /></button> */}
+                <button onClick={() => handleSendMsg && handleSendMsg(typingMessage)} className={cx('btn-action', 'btn-send')}>Send <IoIosPaperPlane className={cx("send-icon")} /></button>
+            </div>
+        </div>
+    )
+}
 export default Chat

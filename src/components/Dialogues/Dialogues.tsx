@@ -9,6 +9,8 @@ import { setConversation, setPendingConversation } from '@redux/slices/Conversat
 import { Link } from 'react-router-dom'
 import { ConversationType } from '../../types/conversation'
 import { setCurrentChatAndChat } from '@redux/slices/Chat.slice'
+import { BsSearch } from 'react-icons/bs'
+import { AiOutlineUserAdd, AiOutlineUsergroupAdd } from 'react-icons/ai'
 const cx = bindClass.bind(style)
 
 const Dialogues = () => {
@@ -26,126 +28,32 @@ const Dialogues = () => {
     const listConversation = useMemo(() => {
         if (!conversations.conversations) return null
         return conversations.conversations.map((conversation, index) => {
-            if (!conversation.is_group) {
-                return (
-                    <DialoguesItem key={conversation._id} conversation={conversation} authId={auth?._id} onClick={() => disPatch(setCurrentChatAndChat(conversation))} />
-                )
-            }
-
-            return null
-
+            return (
+                <DialoguesItem key={conversation._id} conversation={conversation} authId={auth?._id} onClick={() => disPatch(setCurrentChatAndChat(conversation))} />
+            )
         })
     }, [conversations])
 
     return (
         <div className={cx('dialogues')}>
             <div className={cx("header")}>
-                <div className={cx("search")}>
-                    <div className={cx("search-icon")}><Search /></div>
-                    <input type="text" placeholder='Enter for search...' />
+                <div className={cx("title")}>Chats</div>
+                <div className={cx("header-actions")}>
+                    <div className={cx("search")}>
+                        <div className={cx("search-icon")}><BsSearch /></div>
+                        <input type="text" placeholder='Enter for search...' />
+                    </div>
+                    <button className={cx("btn-add_friend", "btn")}>
+                        <AiOutlineUserAdd />
+                    </button>
+                    <button className={cx("btn-add_group", "btn")}>
+                        <AiOutlineUsergroupAdd />
+                    </button>
                 </div>
             </div>
 
             <div className={cx("dialogues-list")}>
                 {listConversation && listConversation}
-
-                {/* <a href="#">
-                    <div className={cx("dialogues-items")}>
-                        <div className={cx("items-info")}>
-                            <div className={cx("avatar")}>
-                                <img src={avatar} alt="avatar" />
-                                <div className={cx("dot-status", "online", "dot")}></div>
-                            </div>
-                            <div className={cx("name-box")}>
-                                <div className={cx("name")}>Donald Johnson</div>
-                                <div className={cx("online-status")}>Online</div>
-                            </div>
-                            <div className={cx("online-time")}>3h ago</div>
-                        </div>
-                        <div className={cx("message-box")}>
-                            <div className={cx("message")}>Analysis of foreign experience, as it is commo…</div>
-                            <div className={cx("count")}>2</div>
-                        </div>
-                    </div>
-                </a>
-
-                <a href="#">
-                    <div className={cx("dialogues-items", "dark")}>
-                        <div className={cx("items-info")}>
-                            <div className={cx("avatar")}>
-                                <img src={avatar} alt="avatar" />
-                                <div className={cx("dot-status", "dot")}></div>
-                            </div>
-                            <div className={cx("name-box", "dark")}>
-                                <div className={cx("name")}>Donald Johnson</div>
-                                <div className={cx("online-status")}>Online</div>
-                            </div>
-                            <div className={cx("online-time")}>3h ago</div>
-                        </div>
-                        <div className={cx("message-box")}>
-                            <div className={cx("message")}>Analysis of foreign experience, as it is commo…</div>
-                            <div className={cx("count")}>2</div>
-                        </div>
-                    </div>
-                </a>
-                <a href="#">
-                    <div className={cx("dialogues-items")}>
-                        <div className={cx("items-info")}>
-                            <div className={cx("avatar")}>
-                                <img src={avatar} alt="avatar" />
-                                <div className={cx("dot-status", "dot")}></div>
-                            </div>
-                            <div className={cx("name-box")}>
-                                <div className={cx("name")}>Donald Johnson</div>
-                                <div className={cx("online-status")}>Online</div>
-                            </div>
-                            <div className={cx("online-time")}>3h ago</div>
-                        </div>
-                        <div className={cx("message-box")}>
-                            <div className={cx("message")}>Analysis of foreign experience, as it is commo…</div>
-                            <div className={cx("count")}>2</div>
-                        </div>
-                    </div>
-                </a>
-                <a href="#">
-                    <div className={cx("dialogues-items", "dark")}>
-                        <div className={cx("items-info")}>
-                            <div className={cx("avatar")}>
-                                <img src={avatar} alt="avatar" />
-                                <div className={cx("dot-status", "online", "dot")}></div>
-                            </div>
-                            <div className={cx("name-box")}>
-                                <div className={cx("name")}>Donald Johnson</div>
-                                <div className={cx("online-status")}>Online</div>
-                            </div>
-                            <div className={cx("online-time")}>3h ago</div>
-                        </div>
-                        <div className={cx("message-box")}>
-                            <div className={cx("message")}>Analysis of foreign experience, as it is commo…</div>
-                            <div className={cx("count")}>2</div>
-                        </div>
-                    </div>
-                </a>
-                <a href="#">
-                    <div className={cx("dialogues-items")}>
-                        <div className={cx("items-info",)}>
-                            <div className={cx("avatar")}>
-                                <img src={avatar} alt="avatar" />
-                                <div className={cx("dot-status", "online", "dot")}></div>
-                            </div>
-                            <div className={cx("name-box")}>
-                                <div className={cx("name")}>Donald Johnson</div>
-                                <div className={cx("online-status")}>Online</div>
-                            </div>
-                            <div className={cx("online-time")}>3h ago</div>
-                        </div>
-                        <div className={cx("message-box")}>
-                            <div className={cx("message")}>Analysis of foreign experience, as it is commo…</div>
-                            <div className={cx("count")}>2</div>
-                        </div>
-                    </div>
-                </a> */}
-
             </div>
         </div>
     )
@@ -160,6 +68,7 @@ export interface DialoguesItemType {
 const DialoguesItem = ({ conversation, authId, onClick }: DialoguesItemType) => {
 
     const socket = useAppSelector(state => state.socket.socket)
+    const currentChatId = useAppSelector(state => state.chat.currentChat?._id)
 
     useEffect(() => {
         if (conversation.is_group && socket) {
@@ -185,23 +94,48 @@ const DialoguesItem = ({ conversation, authId, onClick }: DialoguesItemType) => 
 
     if (!friend || friend.length <= 0) return null
 
+    if (conversation.is_group) {
+        return (
+            <Link onClick={onClick} to="#">
+                <div className={cx("dialogues-items", { active: currentChatId === conversation._id })}>
+                    <div className={cx("dot-status", { online: isOnline }, "dot")}></div>
+
+                    <div className={cx("items-info")}>
+                        <div className={cx("avatar", "group-avatar", `member-${conversation.members.length}`)}>
+                            {conversation.members.map((fr => (<img key={fr._id} src={fr.avatar_url} alt="avatar" />)))}
+                            {
+                                conversation.members.length > 3 && <div className={cx("more-avatar")}>{conversation.members.length - 3}</div>
+                            }
+                        </div>
+                        <div className={cx("name-box")}>
+                            <div className={cx("name")}>{`${conversation.name}`}</div>
+                            <div className={cx("message")}>{conversation.lastMessage?.content}</div>
+                        </div>
+                        <div className={cx("online-time")}>3h ago</div>
+                    </div>
+
+                </div>
+            </Link>
+        )
+    }
+
     return (
         <Link onClick={onClick} to="#">
-            <div className={cx("dialogues-items")}>
+            <div className={cx("dialogues-items", { active: currentChatId === conversation._id })}>
+                <div className={cx("dot-status", { online: isOnline }, "dot")}></div>
+
                 <div className={cx("items-info")}>
                     <div className={cx("avatar")}>
                         <img src={friend[0].avatar_url} alt="avatar" />
-                        <div className={cx("dot-status", { online: isOnline }, "dot")}></div>
                     </div>
                     <div className={cx("name-box")}>
-                        <div className={cx("name")}>{`${friend[0].first_name} ${friend[0].last_name}`}</div>
-                        <div className={cx("online-status")}>{isOnline ? "Online" : "Offline"}</div>
+                        <div className={cx("name")}>
+                            {`${friend[0].first_name} ${friend[0].last_name}`}
+                            <div className={cx("online-time")}>3h ago</div>
+                        </div>
+                        <div className={cx("message")}>{conversation.lastMessage?.content}</div>
                     </div>
-                    <div className={cx("online-time")}>3h ago</div>
-                </div>
-                <div className={cx("message-box")}>
-                    <div className={cx("message")}>{conversation.lastMessage?.content}</div>
-                    {/* <div className={cx("count")}>2</div> */}
+
                 </div>
             </div>
         </Link>

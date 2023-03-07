@@ -15,8 +15,8 @@ const initialState: ChatState = {
     isChat: false
 }
 
-export const ChatSlice = createSlice({
-    name: 'socket',
+const ChatSlice = createSlice({
+    name: 'chat',
     initialState,
     reducers: {
         setCurrentChatAndChat: (state, action: PayloadAction<ConversationType>) => {

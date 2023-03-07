@@ -2,11 +2,13 @@ import React, { CSSProperties } from "react";
 import styles from "./LeftSide.module.scss";
 import bindClass from "classnames/bind";
 import avatar from "@assets/images/Userpic.jpg";
-import { AiFillHome } from "react-icons/ai"
+import { AiFillHome, AiOutlineHome, AiOutlinePoweroff } from "react-icons/ai"
+import { HiOutlineUsers } from 'react-icons/hi2'
+import { BsBell } from 'react-icons/bs'
 import { FaUserFriends, FaBell } from 'react-icons/fa'
 import { GoSignOut } from 'react-icons/go'
 import { useAppDispatch, useAppSelector } from "@hooks/redux";
-import { useNavigate } from "react-router-dom";
+import { Link, NavLink, useNavigate } from "react-router-dom";
 import authApis from "@apis/auth.api";
 import { logOut } from "@redux/slices/Auth.slice";
 const cx = bindClass.bind(styles);
@@ -33,29 +35,29 @@ const LeftSide = () => {
     <div className={cx("left-side")}>
       <div className={cx("avatar")}>
         <img src={auth.profile?.avatar_url} alt="avatar" />
-        <div className={cx("dot-status", auth.profile?.online_status, "status")}></div>
+        <div className={cx("dot-status", "dot", auth.profile?.online_status, "status")}></div>
       </div>
       <ul className={cx("side-menu")} style={{ '--pos': '1' } as CSSPropertiesWithVars}>
         <li>
-          <a href="#" className={cx("side-menu__item", 'active', "icons")}>
-            <AiFillHome />
-          </a>
+          <NavLink to="/" className={({ isActive }) => (isActive === true) ? cx("side-menu__item", 'active', "icons") : cx("side-menu__item", "icons")}>
+            <AiOutlineHome />
+          </NavLink>
         </li>
 
         <li>
-          <a href="#" className={cx("side-menu__item", "icons")}>
-            <FaUserFriends />
-          </a>
+          <NavLink to="/list" className={({ isActive }) => isActive === true ? cx("side-menu__item", 'active', "icons") : cx("side-menu__item", "icons")}>
+            <HiOutlineUsers />
+          </NavLink>
         </li>
         <li>
           <a href="#" className={cx("side-menu__item", "icons")}>
-            <FaBell />
+            <BsBell />
           </a>
         </li>
       </ul>
 
       <button className={cx("side-signOut", "icons")} onClick={handleLogout}>
-        <GoSignOut />
+        <AiOutlinePoweroff />
       </button>
     </div>
   );

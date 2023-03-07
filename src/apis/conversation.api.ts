@@ -9,6 +9,10 @@ const conversationApi = {
     },
     getMessages: (conversationId: string) => {
         return axiosInstance.get<ApiResponse<Paginate<MessageType>>>(`conversations/${conversationId}/messages`)
+    },
+    getConversationById: (id: string) => {
+        return axiosInstance.get<ApiResponse<ConversationType>>("/conversations/" + id)
+
     }
 }
 
