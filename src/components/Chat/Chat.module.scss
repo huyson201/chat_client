@@ -164,6 +164,10 @@
         color: #aaa;
     }
 
+    .input-field:not(:empty)::before {
+        content: "";
+    }
+
 
 
 }
@@ -240,14 +244,18 @@
     padding-top: 12px;
     padding-left: 12px;
     padding-right: 12px;
-    overflow-y: scroll;
+    overflow: auto;
     height: calc(100% - 143px);
     background-color: $white;
 }
 
-.chat-content::-webkit-scrollbar {
-    width: 0;
-}
+// .chat-content-infinite {
+//     height: 100% !important;
+// }
+
+// .chat-content::-webkit-scrollbar {
+//     width: 0;
+// }
 
 .message {
     display: flex;
@@ -330,4 +338,9 @@
 
 .message.my-msg .message-times .clock {
     order: 2;
+}
+
+.loader {
+    display: flex;
+    justify-content: center;
 }

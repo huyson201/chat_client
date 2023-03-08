@@ -1,0 +1,73 @@
+@use "@sass/styles"as *;
+
+.link-preview {
+    max-width: 300px;
+    width: 100%;
+    box-shadow: 0px 2px 2px rgba($color: $black, $alpha: 0.1);
+}
+
+.link {
+    background-color: $red;
+    border-top-right-radius: 12px;
+    border-top-left-radius: 12px;
+    padding: 6px 12px;
+    color: $white;
+}
+
+.link a {
+    color: $white;
+}
+
+.review-box a {
+    // display: flex;
+    // align-items: center;
+    display: block;
+    color: $black;
+    padding: 6px 12px;
+    text-decoration: none;
+
+
+}
+
+.title {
+    font-size: 16px;
+    font-weight: 600;
+}
+
+.favicon {
+    width: 60px;
+}
+
+.desc {
+    font-size: 12px;
+    margin-top: 6px;
+    color: rgba($color: $black, $alpha: 0.7);
+
+}
+
+.img-box {
+    width: 100%;
+    aspect-ratio: 16 / 9;
+
+    img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+
+    }
+}
+
+
+.message-times {
+    font-size: 12px;
+    color: rgba($color: $black, $alpha: .4);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 12px;
+    padding: 6px 12px;
+
+    &.my-msg {
+        justify-content: flex-end;
+    }
+}

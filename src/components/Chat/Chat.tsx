@@ -1,7 +1,6 @@
-import React, { useState, MouseEvent, useMemo, useEffect, ChangeEvent, useRef, KeyboardEvent } from 'react'
+import React, { useState, MouseEvent, forwardRef, useEffect, useRef, KeyboardEvent, useCallback, useMemo } from 'react'
 import styles from './Chat.module.scss'
 import bindClass from 'classnames/bind'
-import avatar from '@assets/images/Userpic.jpg'
 import data from '@emoji-mart/data'
 import Picker from '@emoji-mart/react'
 import { ImAttachment } from 'react-icons/im'
@@ -12,11 +11,12 @@ import { HiPhone, HiVideoCamera } from 'react-icons/hi'
 import { useAppDispatch, useAppSelector } from '@hooks/redux'
 import { MessageType } from '../../types/Message'
 import conversationApi from '@apis/conversation.api'
-import { Socket } from 'socket.io-client'
-import { setMessages } from '@redux/slices/Message.slice'
+import Linkify from "linkify-react";
+import { loadMessages, setMessages } from '@redux/slices/Message.slice'
 import { format } from "timeago.js"
 import { User } from '../../types/conversation'
 import ContentEditable, { ContentEditableEvent } from 'react-contenteditable'
+import { RotatingLines } from 'react-loader-spinner'
 
 const cx = bindClass.bind(styles)
 
@@ -31,39 +31,65 @@ interface ConversationInfo {
     is_group: boolean
 }
 const Chat = ({ clickRightSide }: ChatProps) => {
-    const scrollRef = useRef<HTMLDivElement>(null)
+
     const dispatch = useAppDispatch()
-    const [showEmoji, setShowEmoji] = useState<boolean>(false)
-    const [sidebarState, setSidebarState] = useState<boolean>(false)
-    // const [messages, setMessages] = useState<MessageType[] | null>([])
     const messages = useAppSelector(state => state.messages)
-    const [typingMessage, setTypingMessage] = useState<string>("")
+
+
+    const chatContentRef = useRef<HTMLDivElement>(null)
     const [receivers, setReceivers] = useState<User | User[] | undefined>([])
+    const [sidebarState, setSidebarState] = useState<boolean>(false)
+    const [showMessageLoader, setShowMessageLoader] = useState<boolean>(false)
     const [conversationInfo, setConversationInfo] = useState<ConversationInfo>({
         name: "",
         isOnline: false,
         is_group: false
     })
+
     const chatConversation = useAppSelector(state => state.chat)
     const auth = useAppSelector(state => state.auth.profile)
     const socket = useAppSelector(state => state.socket.socket)
 
+    const [canFetchNextPage, setCanFetchNextPage] = useState<boolean>(false)
 
-    // get list messages
+
+    const firstMessageRef = useCallback((node: HTMLDivElement) => {
+        if (!node || !chatContentRef.current) return
+        console.log(node.offsetTop - chatContentRef.current.scrollTop)
+        // console.log(node.offsetTop - chatContentRef.current.offsetTop;)
+    }, [messages])
+
+
+
+    useEffect(() => {
+
+        if (chatConversation.currentChat) {
+            setShowMessageLoader(true)
+            conversationApi.getMessages(chatConversation.currentChat._id, 1)
+                .then(res => {
+                    return dispatch(setMessages({
+                        conversationId: chatConversation.currentChat?._id,
+                        messages: res.data.data.docs,
+                        totalPage: res.data.data.totalPages,
+                        nextPage: res.data.data.nextPage
+                    }))
+                })
+                .catch(err => console.log(err)).finally(() => {
+                    setShowMessageLoader(false)
+                })
+        }
+    }, [chatConversation.currentChat])
+
+
+    useEffect(() => {
+        setCanFetchNextPage(false)
+    }, [chatConversation.currentChat])
+
+    // get conversation info
     useEffect(() => {
         if (chatConversation.currentChat) {
-
-            //* get list messages of currentChat
-            conversationApi.getMessages(chatConversation.currentChat._id)
-                .then(res => dispatch(setMessages({
-                    conversationId: chatConversation.currentChat?._id,
-                    messages: res.data.data.docs
-                })))
-                .catch(err => console.log(err))
-
-
             /**
-             * get conversation info
+             ** get conversation info
              ** name, avatar, online statue, receiver
              */
             if (!chatConversation.currentChat.is_group) {
@@ -90,24 +116,20 @@ const Chat = ({ clickRightSide }: ChatProps) => {
         }
 
 
-    }, [chatConversation.currentChat])
-
-
-
+    }, [chatConversation.currentChat, messages.messages])
 
     useEffect(() => {
-        scrollRef.current?.scrollIntoView({ behavior: "smooth" })
-
+        // console.log(firstMessageRef.current)
+        if (!chatContentRef.current || !messages.messages || canFetchNextPage) return
+        const { scrollHeight, clientHeight } = chatContentRef.current
+        chatContentRef.current.scrollTop = scrollHeight - clientHeight
+        setCanFetchNextPage(true)
     }, [messages.messages])
-    // handle click emoji icon to show, hide emoji picker
-    const handleClickEmoji = (e: MouseEvent) => {
-        e.stopPropagation()
-        setShowEmoji(prev => !prev)
-    }
 
 
 
-    // handle click right sidebar button
+
+    //* handle click right sidebar button
     const handleClickRightSide = () => {
         setSidebarState(prev => {
             if (clickRightSide) {
@@ -118,78 +140,81 @@ const Chat = ({ clickRightSide }: ChatProps) => {
 
     }
 
-    //generate list message
-    const genMessages = () => {
-        if (messages.conversationId !== chatConversation.currentChat?._id) return
-        return messages.messages?.map(message => {
-            let senderId = message.sender._id || message.sender
-            let msgType: "my-msg" | "friend-msg" = senderId === auth?._id ? "my-msg" : "friend-msg"
-            return <MessageItem key={message._id} message={message} msgType={msgType} />
-        })
-    }
 
-    //handle type message
-    const handleOnchangeMsg = (e: ChangeEvent<HTMLInputElement>) => {
-        setTypingMessage(e.target.value)
+
+    //* set nextPage if scrollTop = 0
+    //* load message after scroll to top
+    const handleScroll = (e: any) => {
+        if (!chatConversation.currentChat || !messages.nextPage) return
+        if (e.currentTarget?.scrollTop === 0 && canFetchNextPage && messages.nextPage) {
+            setShowMessageLoader(true)
+            conversationApi.getMessages(chatConversation.currentChat._id, messages.nextPage)
+                .then(res => {
+                    dispatch(loadMessages({
+                        conversationId: chatConversation.currentChat?._id,
+                        messages: res.data.data.docs,
+                        totalPage: res.data.data.totalPages,
+                        nextPage: res.data.data.nextPage
+                    }))
+                })
+                .catch(err => console.log(err)).finally(() => setShowMessageLoader(false))
+        }
     }
 
     // handle send message
-    const handleSendMsg = () => {
+    const handleSendMsg = (message: string) => {
         if (socket) {
             socket.emit("sendMessage", {
                 conversation: chatConversation.currentChat,
                 sender: auth,
-                message: typingMessage,
+                message: message,
                 to: receivers
             })
         }
-        setTypingMessage("")
+        // setTypingMessage("")
     }
+
+
+    //* generate list message
+    const genMessages = () => {
+        if (messages.conversationId !== chatConversation.currentChat?._id) return
+        return messages.messages?.map((message, index) => {
+            let senderId = message.sender._id || message.sender
+            let msgType: "my-msg" | "friend-msg" = senderId === auth?._id ? "my-msg" : "friend-msg"
+            if (index === 0) {
+                return <MessageItem ref={firstMessageRef} key={message._id} message={message} msgType={msgType} />
+            }
+            return <MessageItem key={message._id} message={message} msgType={msgType} />
+        })
+    }
+
+
+
 
     return (
         <div className={cx("chat-box")}>
             <ChatHeader conversationInfo={conversationInfo} handleClickRightSide={handleClickRightSide} active={sidebarState} />
-            <div className={cx("chat-content")}>
-                {genMessages()}
-                <div style={{ float: "left", clear: "both" }} ref={scrollRef}></div>
-            </div>
-            <ChatInput />
 
-            {/* <div className={cx("send-message")} >
-                <div className={cx("emoji-picker", { "show": showEmoji })}>
-                    <Picker
-                        onClickOutside={handleClickOutSideEmoji}
-                        navPosition={"bottom"}
-                        locale="vi"
-                        perLine={11}
-                        maxFrequentRows={1}
-                        previewPosition={"none"}
-                        data={data}
-                        onEmojiSelect={console.log}
-                        showPreview={false}
-                        showSkinTones={false}
-                        theme={"auto"}
+            <div ref={chatContentRef} className={cx("chat-content")} onScroll={handleScroll}>
+                <div className={cx("loader")}>
+                    <RotatingLines
+                        strokeColor="grey"
+                        strokeWidth="5"
+                        animationDuration="0.75"
+                        width="40"
+                        visible={showMessageLoader}
                     />
                 </div>
-                <div className={cx("input-field")}>
-                    <div className={cx("files")}>
-                        <button className={cx('btn-action', 'btn-attack-file')}>
-                            <ImAttachment />
-                        </button>
-                    </div>
-                    <input type="text" placeholder='Type a message hear...' onChange={handleOnchangeMsg} value={typingMessage} />
-                    <div className={cx("buttons")}>
-                        <button className={cx('btn-action', 'btn-emoji', { show: showEmoji })} onClick={handleClickEmoji}>
-                            <MdEmojiEmotions />
-                        </button>
-                        <button className={cx('btn-action', 'btn-mic')}><BsFillMicFill /></button>
-                        <button onClick={handleSendMsg} className={cx('btn-action', 'btn-send')}> <IoIosPaperPlane /></button>
-                    </div>
-                </div>
-            </div> */}
+                {genMessages()}
+                {/* <div style={{ float: "left", clear: "both" }} ref={scrollRef}></div> */}
+            </div>
+
+            <ChatInput />
+
         </div>
     )
 }
+
 
 /**
  ** Message Item components
@@ -198,26 +223,58 @@ export interface MessageItemProps {
     msgType: "my-msg" | "friend-msg",
     message: MessageType
 }
+import LinkPreview from './LinkPreview/LinkPreview'
+// import ReactTinyLink from 'react-tiny-link';  
+import * as linkify from "linkifyjs";
 
-export const MessageItem = ({ message, msgType = "my-msg" }: MessageItemProps) => {
+
+export const MessageItem = forwardRef<HTMLDivElement, MessageItemProps>(({ message, msgType = "my-msg" }, ref) => {
+    const links = useMemo(() => {
+        return linkify.find(message.content)
+    }, [message])
+
+
     return (
-        <div className={cx("message", msgType)}>
+        <div ref={ref} className={cx("message", msgType)}>
             <div className={cx("message-box")}>
                 {msgType === "friend-msg" && <div className={cx("sender")}>{`${message.sender.first_name} ${message.sender.last_name}`} </div>}
-                <div className={cx("box")}>
-                    <div className={cx("message-content")}>
-                        {message.content}
+                {
+                    links.length === 0 && <div className={cx("box")}>
+                        <div className={cx("message-content")}>
+                            {message.content}
+                        </div>
+                        <div className={cx("message-times")}>
+                            <BsClock className={cx("clock")} />
+                            {format(message.createdAt.toString())}
+                        </div>
                     </div>
-                    <div className={cx("message-times")}>
-                        <BsClock className={cx("clock")} />
-                        {format(message.createdAt.toString())}
-                    </div>
+                }
 
-                </div>
+                {
+                    links.length === 1 && <LinkPreview msgType={msgType} url={links[0].href} message={message} />
+                }
+
+                {
+                    links.length >= 2 && <div className={cx("box")}>
+                        <div className={cx("message-content")}>
+                            <Linkify>
+                                {message.content}
+                            </Linkify>
+                        </div>
+                        <div className={cx("message-times")}>
+                            <BsClock className={cx("clock")} />
+                            {format(message.createdAt.toString())}
+                        </div>
+                    </div>
+                }
+
+
             </div>
         </div>
     )
-}
+})
+
+
 
 
 /**
@@ -284,6 +341,8 @@ export interface ChatInputProps {
 
 const ChatInput = ({ handleSendMsg }: ChatInputProps) => {
     const emojiPickerRef = useRef<HTMLDivElement>(null)
+    const inputRef = useRef<HTMLDivElement>(null)
+    const inputFileRef = useRef<HTMLInputElement>(null)
     const [showEmoji, setShowEmoji] = useState<boolean>(false)
     const [typingMessage, setTypingMessage] = useState<string>("")
 
@@ -321,10 +380,18 @@ const ChatInput = ({ handleSendMsg }: ChatInputProps) => {
         setShowEmoji(false)
     }
 
+
+    const handleSelectEmoji = (data: any) => {
+        setTypingMessage(prev => prev + data.native)
+        inputRef.current?.setAttribute("data-placeholder", '')
+    }
+
+
     return (
         <div className={cx("send-message")} >
             <div className={cx("files")}>
-                <button className={cx('btn-action', 'btn-attack-file')}>
+                <input type="file" name='file' hidden ref={inputFileRef} accept='.doc,.docx,.txt,.zip,.pdf,.rar' />
+                <button className={cx('btn-action', 'btn-attack-file')} onClick={() => inputFileRef.current?.click()}>
                     <ImAttachment />
                 </button>
             </div>
@@ -336,6 +403,7 @@ const ChatInput = ({ handleSendMsg }: ChatInputProps) => {
                     tagName='div'
                     className={cx("input-field")}
                     data-placeholder='Aa'
+                    innerRef={inputRef}
 
 
                 />
@@ -346,12 +414,12 @@ const ChatInput = ({ handleSendMsg }: ChatInputProps) => {
                         <Picker
                             onClickOutside={handleClickOutSideEmoji}
                             navPosition={"bottom"}
-                            locale="vi"
+                            locale="us"
                             perLine={11}
                             maxFrequentRows={1}
                             previewPosition={"none"}
                             data={data}
-                            onEmojiSelect={console.log}
+                            onEmojiSelect={handleSelectEmoji}
                             showPreview={false}
                             showSkinTones={false}
                             theme={"auto"}
