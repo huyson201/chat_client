@@ -1,0 +1,188 @@
+@use "@sass/styles"as *;
+
+.add-friend_form {
+    width: 360px;
+}
+
+.form-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    text-transform: capitalize;
+    font-weight: 600;
+    padding: 12px;
+    border-bottom: 1px solid $gray-300;
+}
+
+.times-btn {
+    font-size: 26px;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 50%;
+    transition: all 0.3s ease;
+    cursor: pointer;
+
+    &:hover {
+        background-color: #dfe2e7;
+    }
+}
+
+.input-field {
+    margin-top: 12px;
+    padding: 0px 12px;
+    display: flex;
+    gap: 12px;
+
+    input {
+        flex: 1;
+        border-bottom: 1px solid #000;
+        padding: 12px 12px 12px 0;
+
+        &:focus {
+            border-bottom-color: #0068ff;
+        }
+    }
+
+    button {
+        cursor: pointer;
+        font-size: 20px;
+
+        &:hover {
+            color: $red;
+        }
+    }
+}
+
+.buttons {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 12px;
+    padding: 12px;
+
+    .btn {
+        padding: 10px 16px;
+        border-radius: 4px;
+        transition: all 0.3s ease;
+
+        &:hover {
+            opacity: 0.7;
+        }
+    }
+
+    .search {
+        background-color: $red;
+        color: $white;
+    }
+
+    .cancel {
+        color: $black;
+        background-color: #eaedf0;
+        font-weight: 600;
+
+    }
+}
+
+.error-feedback {
+    padding: 0 12px;
+    color: $red;
+    font-size: 12px;
+    margin-top: 6px;
+    display: none;
+}
+
+.error-feedback.show {
+    display: block;
+}
+
+.user-info {
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+    align-items: center;
+    padding: 24px;
+}
+
+.avatar {
+    $size: 80px;
+    width: $size;
+    height: $size;
+
+    img {
+        border-radius: 50%;
+        object-fit: cover;
+        height: 100%;
+        width: 100%;
+    }
+}
+
+.name {
+    font-size: 1.5rem;
+    margin-top: 6px;
+}
+
+.email {
+    font-size: 16px;
+    color: rgba($color: $black, $alpha: 0.6);
+}
+
+.add-friend_btn {
+    margin-top: 12px;
+    padding: 8px 24px;
+    text-transform: capitalize;
+    color: $black;
+    background-color: #eaedf0;
+    font-weight: 600;
+    font-size: 16px;
+    border-radius: 4px;
+}
+
+.request-friend {
+    padding: 12px;
+    width: 100%;
+}
+
+.request-text {
+    position: relative;
+
+    textarea {
+        width: 100%;
+        border: 1px solid #0068ff;
+        border-radius: 4px;
+        width: 100%;
+        resize: none;
+        height: 110px;
+        padding: 12px;
+        overflow: auto;
+
+        &:focus {
+            outline: none;
+        }
+    }
+
+    span.count-char {
+        position: absolute;
+        color: rgba($color: $black, $alpha: 0.6);
+        bottom: 8px;
+        font-size: 14px;
+        right: 8px;
+    }
+}
+
+.request-btns {
+    padding: 12px 0;
+}
+
+.add-confirm {
+    background-color: #0068ff;
+    color: $white;
+}
+
+.request-sent {
+    margin-top: 6px;
+    font-size: 18px;
+    color: #0068ff;
+}

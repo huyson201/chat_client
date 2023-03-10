@@ -1,5 +1,5 @@
 import { Auth, AuthCommonInfo } from "../types/Auth"
-import { RequestFriend } from "../types/RequestFriend"
+import { FindFriendData, RequestFriend } from "../types/RequestFriend"
 import { ApiResponse } from "../types/common"
 import { ConversationType } from "../types/conversation"
 import axiosInstance from "./axiosInstance"
@@ -27,6 +27,9 @@ const authApis = {
     },
     getRequestFriend: () => {
         return axiosInstance.get<ApiResponse<RequestFriend>>("users/request-friends")
+    },
+    findUser: (email: string) => {
+        return axiosInstance.get<ApiResponse<FindFriendData>>("users/find" + `?email=${email}`)
     }
 }
 

@@ -11,7 +11,11 @@ import { BsSearch } from 'react-icons/bs'
 import { AiOutlineUserAdd, AiOutlineUsergroupAdd } from 'react-icons/ai'
 const cx = bindClass.bind(style)
 
-const Dialogues = () => {
+export interface DialoguesProps {
+    onClickAddFriend: () => void
+}
+
+const Dialogues = ({ onClickAddFriend }: DialoguesProps) => {
     const disPatch = useAppDispatch()
     const conversations = useAppSelector(state => state.conversation)
     const auth = useAppSelector(state => state.auth.profile)
@@ -41,7 +45,7 @@ const Dialogues = () => {
                         <div className={cx("search-icon")}><BsSearch /></div>
                         <input type="text" placeholder='Enter for search...' />
                     </div>
-                    <button className={cx("btn-add_friend", "btn")}>
+                    <button className={cx("btn-add_friend", "btn")} onClick={onClickAddFriend}>
                         <AiOutlineUserAdd />
                     </button>
                     <button className={cx("btn-add_group", "btn")}>
@@ -79,7 +83,7 @@ const DialoguesItem = ({ conversation, authId, onClick }: DialoguesItemType) => 
             }
         }
 
-    }, [socket])
+    }, [conversation, authId])
 
     let friend = useMemo(() => {
         return conversation.members?.filter(fr => fr._id !== authId)
@@ -107,7 +111,7 @@ const DialoguesItem = ({ conversation, authId, onClick }: DialoguesItemType) => 
                         </div>
                         <div className={cx("name-box")}>
                             <div className={cx("name")}>{`${conversation.name}`}</div>
-                            <div className={cx("message")}>{conversation.lastMessage?.content}</div>
+                            <div className={cx("message")}>{conversation.lastMessage?.content || 'Not available message'}</div>
                         </div>
                     </div>
 
@@ -129,7 +133,7 @@ const DialoguesItem = ({ conversation, authId, onClick }: DialoguesItemType) => 
                         <div className={cx("name")}>
                             {`${friend[0].first_name} ${friend[0].last_name}`}
                         </div>
-                        <div className={cx("message")}>{conversation.lastMessage?.content}</div>
+                        <div className={cx("message")}>{conversation.lastMessage?.content || 'Not available message'}</div>
                     </div>
 
                 </div>

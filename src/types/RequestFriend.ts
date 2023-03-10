@@ -9,3 +9,8 @@ export interface RequestFriend {
     createdAt: Date;
     updatedAt: Date;
 }
+
+export interface FindFriendData extends AuthCommonInfo {
+    isFriend: boolean
+    isRequested: boolean
+} 

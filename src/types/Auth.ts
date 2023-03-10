@@ -25,5 +25,4 @@ export interface AuthCommonInfo {
     email: string
     avatar_url?: string;
     online_status: 'online' | 'offline'
-
 }
