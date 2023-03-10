@@ -17,7 +17,8 @@ export interface ConversationType {
     members: User[],
     lastMessage?: {
         sender: string,
-        content: string
+        content: string,
+        createdAt: Date
     }
     is_group: boolean,
 }

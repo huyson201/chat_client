@@ -1,0 +1,70 @@
+@use "@sass/styles"as *;
+
+.header {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    padding: 12px 20px;
+    border-bottom: 1px solid $gray-300;
+    background-color: $white
+}
+
+.avatar {
+    @include avatar;
+}
+
+.avt-dot {
+    border: 4px solid $gray-bg;
+    position: absolute;
+    left: 0;
+    top: 0;
+    transform: translate(-2px, -2px);
+}
+
+.info .name {
+    color: $black;
+    font-weight: 900;
+    font-size: 18px;
+}
+
+.info .online-status {
+    font-size: 14px;
+    color: rgba($color: $black, $alpha: .4);
+    display: flex;
+    align-items: center;
+
+    .dot {
+        width: 4px;
+        height: 4px;
+        display: inline-block;
+        background-color: rgba($color: $black, $alpha: .4);
+        border-radius: 50%;
+        margin: 0 4px;
+        transform: translateY(2px);
+    }
+
+}
+
+.actions {
+    margin-left: auto;
+    align-self: flex-start;
+
+    button {
+        border: none;
+        background-color: none;
+        padding: 6px 12px;
+        cursor: pointer;
+        color: rgba($color: $black, $alpha: .4);
+        font-size: 24px;
+
+    }
+
+    button.video-call {
+        scale: 1.3;
+    }
+
+    button.sidebar-right.active {
+        color: $red;
+    }
+
+}

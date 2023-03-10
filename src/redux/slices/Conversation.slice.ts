@@ -28,7 +28,7 @@ export const conversationSlice = createSlice({
         setPendingConversation: (state, action: PayloadAction<boolean>) => {
             state.isPending = action.payload
         },
-        updateLastMessage: (state, action: PayloadAction<{ conversationId: string, lastMessage: { sender: any, content: string } }>) => {
+        updateLastMessage: (state, action: PayloadAction<{ conversationId: string, lastMessage: { sender: any, content: string, createdAt: Date } }>) => {
             if (state.conversations) {
                 let newConversations = [...state.conversations]
                 let conversation = newConversations.find(cv => cv._id === action.payload.conversationId)

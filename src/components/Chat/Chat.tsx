@@ -1,22 +1,16 @@
-import React, { useState, MouseEvent, forwardRef, useEffect, useRef, KeyboardEvent, useCallback, useMemo } from 'react'
+import React, { useState, useEffect, useRef, useCallback } from 'react'
 import styles from './Chat.module.scss'
 import bindClass from 'classnames/bind'
-import data from '@emoji-mart/data'
-import Picker from '@emoji-mart/react'
-import { ImAttachment } from 'react-icons/im'
-import { MdEmojiEmotions } from 'react-icons/md'
-import { IoIosPaperPlane } from 'react-icons/io'
-import { BsClock, BsFillMicFill, BsLayoutSidebarInsetReverse } from 'react-icons/bs'
-import { HiPhone, HiVideoCamera } from 'react-icons/hi'
+import ChatInput from './ChatInput/ChatInput'
+import ChatHeader from './ChatHeader/ChatHeader'
 import { useAppDispatch, useAppSelector } from '@hooks/redux'
-import { MessageType } from '../../types/Message'
 import conversationApi from '@apis/conversation.api'
-import Linkify from "linkify-react";
-import { loadMessages, setMessages } from '@redux/slices/Message.slice'
-import { format } from "timeago.js"
+import { setMessages } from '@redux/slices/Message.slice'
 import { User } from '../../types/conversation'
-import ContentEditable, { ContentEditableEvent } from 'react-contenteditable'
 import { RotatingLines } from 'react-loader-spinner'
+import MessageItem from './MessageItem/MessageItem'
+import chatImg from '@assets/images/group-chat.svg'
+import About from "@components/About/About";
 
 const cx = bindClass.bind(styles)
 
@@ -24,7 +18,7 @@ interface ChatProps {
     clickRightSide?: (clickState: boolean) => void
 }
 
-interface ConversationInfo {
+export interface ConversationInfo {
     name?: string,
     isOnline?: boolean,
     avatar?: string | string[],
@@ -37,6 +31,7 @@ const Chat = ({ clickRightSide }: ChatProps) => {
 
 
     const chatContentRef = useRef<HTMLDivElement>(null)
+    const scrollRef = useRef<HTMLDivElement>(null)
     const [receivers, setReceivers] = useState<User | User[] | undefined>([])
     const [sidebarState, setSidebarState] = useState<boolean>(false)
     const [showMessageLoader, setShowMessageLoader] = useState<boolean>(false)
@@ -50,28 +45,25 @@ const Chat = ({ clickRightSide }: ChatProps) => {
     const auth = useAppSelector(state => state.auth.profile)
     const socket = useAppSelector(state => state.socket.socket)
 
-    const [canFetchNextPage, setCanFetchNextPage] = useState<boolean>(false)
+    const [firstLoad, setFirstLoad] = useState<boolean>(false)
 
 
     const firstMessageRef = useCallback((node: HTMLDivElement) => {
         if (!node || !chatContentRef.current) return
         console.log(node.offsetTop - chatContentRef.current.scrollTop)
-        // console.log(node.offsetTop - chatContentRef.current.offsetTop;)
     }, [messages])
 
 
 
+    //* load messages
     useEffect(() => {
-
         if (chatConversation.currentChat) {
             setShowMessageLoader(true)
-            conversationApi.getMessages(chatConversation.currentChat._id, 1)
+            conversationApi.getMessages(chatConversation.currentChat._id)
                 .then(res => {
                     return dispatch(setMessages({
                         conversationId: chatConversation.currentChat?._id,
-                        messages: res.data.data.docs,
-                        totalPage: res.data.data.totalPages,
-                        nextPage: res.data.data.nextPage
+                        messages: res.data.data
                     }))
                 })
                 .catch(err => console.log(err)).finally(() => {
@@ -82,10 +74,10 @@ const Chat = ({ clickRightSide }: ChatProps) => {
 
 
     useEffect(() => {
-        setCanFetchNextPage(false)
+        setFirstLoad(false)
     }, [chatConversation.currentChat])
 
-    // get conversation info
+    //* get conversation info
     useEffect(() => {
         if (chatConversation.currentChat) {
             /**
@@ -118,12 +110,17 @@ const Chat = ({ clickRightSide }: ChatProps) => {
 
     }, [chatConversation.currentChat, messages.messages])
 
+    //* scroll to bottom
     useEffect(() => {
-        // console.log(firstMessageRef.current)
-        if (!chatContentRef.current || !messages.messages || canFetchNextPage) return
+
+        if (scrollRef.current && firstLoad) {
+            scrollRef.current.scrollIntoView({ behavior: "smooth" })
+        }
+
+        if (!chatContentRef.current || !messages.messages || firstLoad) return
         const { scrollHeight, clientHeight } = chatContentRef.current
         chatContentRef.current.scrollTop = scrollHeight - clientHeight
-        setCanFetchNextPage(true)
+        setFirstLoad(true)
     }, [messages.messages])
 
 
@@ -142,26 +139,26 @@ const Chat = ({ clickRightSide }: ChatProps) => {
 
 
 
-    //* set nextPage if scrollTop = 0
-    //* load message after scroll to top
-    const handleScroll = (e: any) => {
-        if (!chatConversation.currentChat || !messages.nextPage) return
-        if (e.currentTarget?.scrollTop === 0 && canFetchNextPage && messages.nextPage) {
-            setShowMessageLoader(true)
-            conversationApi.getMessages(chatConversation.currentChat._id, messages.nextPage)
-                .then(res => {
-                    dispatch(loadMessages({
-                        conversationId: chatConversation.currentChat?._id,
-                        messages: res.data.data.docs,
-                        totalPage: res.data.data.totalPages,
-                        nextPage: res.data.data.nextPage
-                    }))
-                })
-                .catch(err => console.log(err)).finally(() => setShowMessageLoader(false))
-        }
-    }
+    // //* set nextPage if scrollTop = 0
+    // //* load message after scroll to top
+    // const handleScroll = (e: any) => {
+    //     if (!chatConversation.currentChat || !messages.nextPage) return
+    //     if (e.currentTarget?.scrollTop === 0 && canFetchNextPage && messages.nextPage) {
+    //         setShowMessageLoader(true)
+    //         conversationApi.getMessages(chatConversation.currentChat._id, messages.nextPage)
+    //             .then(res => {
+    //                 dispatch(loadMessages({
+    //                     conversationId: chatConversation.currentChat?._id,
+    //                     messages: res.data.data.docs,
+    //                     totalPage: res.data.data.totalPages,
+    //                     nextPage: res.data.data.nextPage
+    //                 }))
+    //             })
+    //             .catch(err => console.log(err)).finally(() => setShowMessageLoader(false))
+    //     }
+    // }
 
-    // handle send message
+    //* handle send message
     const handleSendMsg = (message: string) => {
         if (socket) {
             socket.emit("sendMessage", {
@@ -171,7 +168,6 @@ const Chat = ({ clickRightSide }: ChatProps) => {
                 to: receivers
             })
         }
-        // setTypingMessage("")
     }
 
 
@@ -189,251 +185,47 @@ const Chat = ({ clickRightSide }: ChatProps) => {
     }
 
 
-
-
-    return (
-        <div className={cx("chat-box")}>
-            <ChatHeader conversationInfo={conversationInfo} handleClickRightSide={handleClickRightSide} active={sidebarState} />
-
-            <div ref={chatContentRef} className={cx("chat-content")} onScroll={handleScroll}>
-                <div className={cx("loader")}>
-                    <RotatingLines
-                        strokeColor="grey"
-                        strokeWidth="5"
-                        animationDuration="0.75"
-                        width="40"
-                        visible={showMessageLoader}
-                    />
+    if (!chatConversation.currentChat || !chatConversation.isChat) {
+        return (
+            <div className={cx("welcome-box")}>
+                <div className={cx("welcome-title")}>
+                    Welcome to my app
                 </div>
-                {genMessages()}
-                {/* <div style={{ float: "left", clear: "both" }} ref={scrollRef}></div> */}
-            </div>
-
-            <ChatInput />
-
-        </div>
-    )
-}
-
-
-/**
- ** Message Item components
- */
-export interface MessageItemProps {
-    msgType: "my-msg" | "friend-msg",
-    message: MessageType
-}
-import LinkPreview from './LinkPreview/LinkPreview'
-// import ReactTinyLink from 'react-tiny-link';  
-import * as linkify from "linkifyjs";
-
-
-export const MessageItem = forwardRef<HTMLDivElement, MessageItemProps>(({ message, msgType = "my-msg" }, ref) => {
-    const links = useMemo(() => {
-        return linkify.find(message.content)
-    }, [message])
-
-
-    return (
-        <div ref={ref} className={cx("message", msgType)}>
-            <div className={cx("message-box")}>
-                {msgType === "friend-msg" && <div className={cx("sender")}>{`${message.sender.first_name} ${message.sender.last_name}`} </div>}
-                {
-                    links.length === 0 && <div className={cx("box")}>
-                        <div className={cx("message-content")}>
-                            {message.content}
-                        </div>
-                        <div className={cx("message-times")}>
-                            <BsClock className={cx("clock")} />
-                            {format(message.createdAt.toString())}
-                        </div>
-                    </div>
-                }
-
-                {
-                    links.length === 1 && <LinkPreview msgType={msgType} url={links[0].href} message={message} />
-                }
-
-                {
-                    links.length >= 2 && <div className={cx("box")}>
-                        <div className={cx("message-content")}>
-                            <Linkify>
-                                {message.content}
-                            </Linkify>
-                        </div>
-                        <div className={cx("message-times")}>
-                            <BsClock className={cx("clock")} />
-                            {format(message.createdAt.toString())}
-                        </div>
-                    </div>
-                }
-
-
-            </div>
-        </div>
-    )
-})
-
-
-
-
-/**
- ** Chat Header Component
- */
-export interface ChatHeaderProps {
-    conversationInfo: ConversationInfo
-    active: boolean,
-    handleClickRightSide: () => void
-}
-
-const ChatHeader = ({ conversationInfo, active, handleClickRightSide }: ChatHeaderProps) => {
-
-    return (
-        <div className={cx("header")}>
-            {conversationInfo.is_group ? (
-                <div className={cx("avatar", "group-avatar", `member-${conversationInfo.avatar?.length}`)}>
-                    {
-                        Array.isArray(conversationInfo.avatar) && conversationInfo.avatar.map(url => {
-                            return (
-                                <img key={url} src={url} alt="avatar" />
-                            )
-                        })
-                    }
-                    <div className={cx("dot-status", { "online": conversationInfo.isOnline }, "avt-dot")}></div>
-                </div>
-            ) : (
-                <div className={cx("avatar")}>
-                    {
-                        !Array.isArray(conversationInfo.avatar) && <img src={conversationInfo.avatar} alt="avatar" />
-                    }
-
-                    <div className={cx("dot-status", { "online": conversationInfo.isOnline }, "avt-dot")}></div>
-                </div>
-            )}
-
-            <div className={cx("info")}>
-                <div className={cx("name")}>{conversationInfo.name || ''}</div>
-                <div className={cx("online-status")}>
-                    {conversationInfo.isOnline ? "Active now" : <>
-                        <span>Offline</span>
-                        <span className={cx("dot")}></span>
-                        <span className="last-seen">Last seen 3 hours ago</span>
-                    </>}
-
+                <p className={cx("sub-title")}>Add friends to chat right now</p>
+                <div className={cx("banner")}>
+                    <img src={chatImg} alt="banner welcome" />
                 </div>
             </div>
-            <div className={cx("actions")}>
-                <button className={cx("call")}><HiPhone /></button>
-                <button className={cx("video-call")}><HiVideoCamera /></button>
-                <button className={cx("sidebar-right", { active })} onClick={handleClickRightSide}><BsLayoutSidebarInsetReverse /></button>
-            </div>
-        </div>
-    )
-}
-
-
-/**
- ** ChatInput components
- */
-export interface ChatInputProps {
-    handleSendMsg?: (message: string) => void
-}
-
-const ChatInput = ({ handleSendMsg }: ChatInputProps) => {
-    const emojiPickerRef = useRef<HTMLDivElement>(null)
-    const inputRef = useRef<HTMLDivElement>(null)
-    const inputFileRef = useRef<HTMLInputElement>(null)
-    const [showEmoji, setShowEmoji] = useState<boolean>(false)
-    const [typingMessage, setTypingMessage] = useState<string>("")
-
-    const handleClickEmoji = (e: MouseEvent) => {
-        e.stopPropagation()
-
-        setShowEmoji(prev => !prev)
+        )
     }
 
-    //handle type message
-    const handleChange = (event: ContentEditableEvent) => {
-        const newValue = event.target.value;
-
-        if (event.currentTarget.scrollHeight >= 140) {
-            event.currentTarget.style.overflowY = 'scroll'
-        }
-        else {
-            event.currentTarget.style.overflowY = 'visible'
-        }
-
-        if (!newValue || newValue === '') {
-            event.currentTarget.setAttribute("data-placeholder", 'Aa')
-        }
-        else {
-            event.currentTarget.setAttribute("data-placeholder", '')
-        }
-        setTypingMessage(newValue);
-        if (handleSendMsg) {
-            handleSendMsg(newValue);
-        }
-    };
-
-    //  hide emoji picker if click outsidez
-    const handleClickOutSideEmoji = () => {
-        setShowEmoji(false)
-    }
-
-
-    const handleSelectEmoji = (data: any) => {
-        setTypingMessage(prev => prev + data.native)
-        inputRef.current?.setAttribute("data-placeholder", '')
-    }
-
-
     return (
-        <div className={cx("send-message")} >
-            <div className={cx("files")}>
-                <input type="file" name='file' hidden ref={inputFileRef} accept='.doc,.docx,.txt,.zip,.pdf,.rar' />
-                <button className={cx('btn-action', 'btn-attack-file')} onClick={() => inputFileRef.current?.click()}>
-                    <ImAttachment />
-                </button>
-            </div>
-            <div className={cx("editable-box")}>
-                <ContentEditable
-                    onChange={handleChange}
-                    disabled={false}
-                    html={typingMessage}
-                    tagName='div'
-                    className={cx("input-field")}
-                    data-placeholder='Aa'
-                    innerRef={inputRef}
+        <div className={cx('chat')}>
+            <div className={cx("chat-box")}>
+                <ChatHeader conversationInfo={conversationInfo} handleClickRightSide={handleClickRightSide} active={sidebarState} />
 
-
-                />
-            </div>
-            <div className={cx("buttons")}>
-                <div className={cx("emoji-box")}>
-                    <div ref={emojiPickerRef} className={cx("emoji-picker", { "show": showEmoji })}>
-                        <Picker
-                            onClickOutside={handleClickOutSideEmoji}
-                            navPosition={"bottom"}
-                            locale="us"
-                            perLine={11}
-                            maxFrequentRows={1}
-                            previewPosition={"none"}
-                            data={data}
-                            onEmojiSelect={handleSelectEmoji}
-                            showPreview={false}
-                            showSkinTones={false}
-                            theme={"auto"}
+                <div ref={chatContentRef} className={cx("chat-content")}>
+                    <div className={cx("loader")}>
+                        <RotatingLines
+                            strokeColor="grey"
+                            strokeWidth="5"
+                            animationDuration="0.75"
+                            width="40"
+                            visible={showMessageLoader}
                         />
                     </div>
-                    <button className={cx('btn-action', 'btn-emoji', { show: showEmoji })} onClick={handleClickEmoji}>
-                        <MdEmojiEmotions />
-                    </button>
+                    {genMessages()}
+                    <div style={{ float: "left", clear: "both" }} ref={scrollRef}></div>
                 </div>
 
-                {/* <button className={cx('btn-action', 'btn-mic')}><BsFillMicFill /></button> */}
-                <button onClick={() => handleSendMsg && handleSendMsg(typingMessage)} className={cx('btn-action', 'btn-send')}>Send <IoIosPaperPlane className={cx("send-icon")} /></button>
+                <ChatInput handleSendMsg={handleSendMsg} />
+
             </div>
+            <About />
         </div>
+
     )
 }
+
+
 export default Chat

@@ -14,41 +14,29 @@
 }
 
 .avatar {
-    width: 100px;
-    height: 100px;
-    position: relative;
-
-    img {
-        width: 100%;
-        height: 100%;
-        border-radius: 50%;
-        object-fit: cover;
-    }
-}
-
-.dot {
-    position: absolute;
-    left: 0;
-    top: 0;
-    width: 24px;
-    height: 24px;
-    border: 6px solid $white;
-    transform: translate(2px, 2px);
+    @include avatar(100px, 64px, 55px);
 }
 
 .name {
     font-size: 20px;
     font-weight: 900;
     color: $black;
-    margin-top: 25px;
 }
 
-.activity {
-    font-size: 14px;
-    color: $black;
-    text-align: center;
-    font-weight: 400;
-    margin-top: 20px;
+.active {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    text-transform: capitalize;
+    color: rgba($color: $black, $alpha: .6);
+    line-height: 2;
+
+}
+
+.dot {
+    width: 12px;
+    height: 12px;
 }
 
 .socials {

@@ -42,7 +42,7 @@
     font-size: 12px;
     margin-top: 6px;
     color: rgba($color: $black, $alpha: 0.7);
-
+    margin-bottom: 12px;
 }
 
 .img-box {
@@ -64,8 +64,6 @@
     display: flex;
     align-items: center;
     gap: 6px;
-    margin-top: 12px;
-    padding: 6px 12px;
 
     &.my-msg {
         justify-content: flex-end;

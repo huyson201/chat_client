@@ -1,70 +1,5 @@
 @use "@sass/styles"as *;
 
-.chat {
-    flex: 1;
-    display: flex;
-
-}
-
-.chat-box {
-    // width: $chatBoxWidth;
-    position: relative;
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    height: 100%;
-    border-right: 1px solid $gray-100;
-    background-color: $gray-bg;
-}
-
-.welcome-box {
-    @extend .chat-box;
-    align-items: center;
-    padding: 24px 0;
-    background-color: $white;
-}
-
-.welcome-title {
-    font-size: 2.5rem;
-    font-weight: 400;
-    text-transform: capitalize;
-}
-
-.sub-title {
-    font-size: 1.2rem;
-    color: rgba($color: $black, $alpha: .4);
-}
-
-.banner {
-    width: 60%;
-    margin-top: 24px;
-}
-
-// chat content
-.chat-content {
-    width: 100%;
-    padding-top: 12px;
-    padding-left: 12px;
-    padding-right: 12px;
-    overflow-y: auto;
-    overflow-x: hidden;
-    height: calc(100% - 143px);
-    background-color: $white;
-}
-
-.chat-content-infinite {
-    height: 100% !important;
-}
-
-.chat-content::-webkit-scrollbar {
-    width: 8px;
-}
-
-.chat-content::-webkit-scrollbar-thumb {
-    background-color: rgba($color: $black, $alpha: .2);
-    border-radius: 5px;
-}
-
 .message {
     display: flex;
     width: 100%;
@@ -115,6 +50,7 @@
     font-size: 14px;
     font-weight: 600;
     position: relative;
+
 }
 
 
@@ -122,6 +58,15 @@
     color: $black;
     text-align: left;
 
+    a {
+        color: #4d7db7;
+    }
+}
+
+.message.my-msg .message-content {
+    a {
+        color: $white;
+    }
 }
 
 
@@ -146,9 +91,4 @@
 
 .message.my-msg .message-times .clock {
     order: 2;
-}
-
-.loader {
-    display: flex;
-    justify-content: center;
 }

@@ -1,8 +1,6 @@
 import React, { useEffect, useMemo } from 'react'
 import style from './Dialogues.module.scss'
 import bindClass from 'classnames/bind'
-import Search from '@components/icons/Search'
-import avatar from "@assets/images/Userpic.jpg"
 import conversationApi from '@apis/conversation.api'
 import { useAppDispatch, useAppSelector } from '@hooks/redux'
 import { setConversation, setPendingConversation } from '@redux/slices/Conversation.slice'
@@ -111,7 +109,6 @@ const DialoguesItem = ({ conversation, authId, onClick }: DialoguesItemType) => 
                             <div className={cx("name")}>{`${conversation.name}`}</div>
                             <div className={cx("message")}>{conversation.lastMessage?.content}</div>
                         </div>
-                        <div className={cx("online-time")}>3h ago</div>
                     </div>
 
                 </div>
@@ -131,7 +128,6 @@ const DialoguesItem = ({ conversation, authId, onClick }: DialoguesItemType) => 
                     <div className={cx("name-box")}>
                         <div className={cx("name")}>
                             {`${friend[0].first_name} ${friend[0].last_name}`}
-                            <div className={cx("online-time")}>3h ago</div>
                         </div>
                         <div className={cx("message")}>{conversation.lastMessage?.content}</div>
                     </div>

@@ -21,8 +21,6 @@ const initialState: MessageState = {
 interface MessagesData {
     messages: MessageType[] | null,
     conversationId?: string,
-    totalPage: number
-    nextPage: number | null
 }
 
 export const socketSlice = createSlice({
@@ -32,20 +30,6 @@ export const socketSlice = createSlice({
         setMessages: (state, action: PayloadAction<MessagesData>) => {
             state.messages = action.payload.messages?.reverse() || null
             state.conversationId = action.payload.conversationId
-            state.totalPages = action.payload.totalPage
-            state.nextPage = action.payload.nextPage
-        },
-        loadMessages: (state, action: PayloadAction<MessagesData>) => {
-            let message = action.payload.messages?.reverse() || []
-            if (state.messages) {
-                state.messages = [...new Set([...message, ...state.messages])]
-            }
-            else {
-                state.messages = [...message]
-            }
-            state.conversationId = action.payload.conversationId
-            state.totalPages = action.payload.totalPage
-            state.nextPage = action.payload.nextPage
         },
         addMessage: (state, action: PayloadAction<MessageType>) => {
             let newMessages
@@ -63,7 +47,7 @@ export const socketSlice = createSlice({
     }
 })
 
-export const { setMessages, addMessage, loadMessages } = socketSlice.actions
+export const { setMessages, addMessage } = socketSlice.actions
 
 
 export default socketSlice.reducer

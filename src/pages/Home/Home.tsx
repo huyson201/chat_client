@@ -68,17 +68,7 @@ const Home = () => {
         }
       });
 
-      //* register receive message
-      socket.on("receiveMessage", (msg: MessageType) => {
-        if (currentChat && currentChat._id === msg.conversation) {
-          dispatch(addMessage(msg))
-          dispatch(updateLastMessage({ conversationId: msg.conversation, lastMessage: { sender: msg.sender._id || msg.sender, content: msg.content } }))
-        }
-        else {
-          dispatch(updateLastMessage({ conversationId: msg.conversation, lastMessage: { sender: msg.sender._id || msg.sender, content: msg.content } }))
-        }
 
-      })
 
 
 
@@ -90,14 +80,35 @@ const Home = () => {
         socket.off('disconnect');
         socket.off("connect_error")
         socket.off("update_onlineStatus")
-        socket.off("receiveMessage")
         socket.disconnect()
         dispatch(disconnectSocket())
       }
     };
-  }, [auth.isLoggedIn])
+  }, [])
 
 
+  //* receive message
+  useEffect(() => {
+    //* register receive message
+    if (socket && socket.connected) {
+      socket.on("receiveMessage", (msg: MessageType) => {
+        if (currentChat && currentChat._id === msg.conversation) {
+          dispatch(addMessage(msg))
+          dispatch(updateLastMessage({ conversationId: msg.conversation, lastMessage: { sender: msg.sender._id || msg.sender, content: msg.content } }))
+        }
+        else {
+          dispatch(updateLastMessage({ conversationId: msg.conversation, lastMessage: { sender: msg.sender._id || msg.sender, content: msg.content } }))
+        }
+      })
+    }
+
+
+    return () => {
+      if (socket) {
+        socket.off("receiveMessage")
+      }
+    }
+  }, [currentChat, auth.isLoggedIn])
   return (
     <div className={cx("home")}>
       <LeftSide />
