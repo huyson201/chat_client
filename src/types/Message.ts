@@ -5,6 +5,8 @@ export interface MessageType {
     conversation: string;
     sender: AuthCommonInfo;
     content: string;
+    contentType: "image" | "text" | "file",
+    fileUrl?: string
     createdAt: Date;
     updatedAt: Date;
 }

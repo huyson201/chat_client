@@ -11,6 +11,8 @@ import { RotatingLines } from 'react-loader-spinner'
 import MessageItem from './MessageItem/MessageItem'
 import chatImg from '@assets/images/group-chat.svg'
 import About from "@components/About/About";
+import { FileUploadResponse } from '../../types/common'
+import FileMessage from './FileMessage/FileMessage'
 
 const cx = bindClass.bind(styles)
 
@@ -48,10 +50,6 @@ const Chat = ({ clickRightSide }: ChatProps) => {
     const [firstLoad, setFirstLoad] = useState<boolean>(false)
 
 
-    const firstMessageRef = useCallback((node: HTMLDivElement) => {
-        if (!node || !chatContentRef.current) return
-        console.log(node.offsetTop - chatContentRef.current.scrollTop)
-    }, [messages])
 
 
 
@@ -139,25 +137,6 @@ const Chat = ({ clickRightSide }: ChatProps) => {
 
 
 
-    // //* set nextPage if scrollTop = 0
-    // //* load message after scroll to top
-    // const handleScroll = (e: any) => {
-    //     if (!chatConversation.currentChat || !messages.nextPage) return
-    //     if (e.currentTarget?.scrollTop === 0 && canFetchNextPage && messages.nextPage) {
-    //         setShowMessageLoader(true)
-    //         conversationApi.getMessages(chatConversation.currentChat._id, messages.nextPage)
-    //             .then(res => {
-    //                 dispatch(loadMessages({
-    //                     conversationId: chatConversation.currentChat?._id,
-    //                     messages: res.data.data.docs,
-    //                     totalPage: res.data.data.totalPages,
-    //                     nextPage: res.data.data.nextPage
-    //                 }))
-    //             })
-    //             .catch(err => console.log(err)).finally(() => setShowMessageLoader(false))
-    //     }
-    // }
-
     //* handle send message
     const handleSendMsg = (message: string) => {
         if (socket) {
@@ -167,6 +146,23 @@ const Chat = ({ clickRightSide }: ChatProps) => {
                 message: message,
                 to: receivers
             })
+
+
+        }
+    }
+
+    const handleSendFile = (fileInfo: FileUploadResponse) => {
+        if (socket) {
+            socket.emit("sendMessage", {
+                conversation: chatConversation.currentChat,
+                sender: auth,
+                message: fileInfo.filename,
+                fileUrl: fileInfo.fileUrl,
+                contentType: "file",
+                to: receivers
+            })
+
+
         }
     }
 
@@ -177,8 +173,8 @@ const Chat = ({ clickRightSide }: ChatProps) => {
         return messages.messages?.map((message, index) => {
             let senderId = message.sender._id || message.sender
             let msgType: "my-msg" | "friend-msg" = senderId === auth?._id ? "my-msg" : "friend-msg"
-            if (index === 0) {
-                return <MessageItem ref={firstMessageRef} key={message._id} message={message} msgType={msgType} />
+            if (message.contentType === "file") {
+                return <FileMessage key={message._id} message={message} msgType={msgType} />
             }
             return <MessageItem key={message._id} message={message} msgType={msgType} />
         })
@@ -218,10 +214,10 @@ const Chat = ({ clickRightSide }: ChatProps) => {
                     <div style={{ float: "left", clear: "both" }} ref={scrollRef}></div>
                 </div>
 
-                <ChatInput handleSendMsg={handleSendMsg} />
+                <ChatInput handleSendMsg={handleSendMsg} handleSendFile={handleSendFile} />
 
             </div>
-            <About />
+            {/* <About /> */}
         </div>
 
     )

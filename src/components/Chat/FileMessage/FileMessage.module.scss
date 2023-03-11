@@ -1,0 +1,30 @@
+@use "@sass/styles"as *;
+@import "../MessageItem/MessageItem.module.scss";
+
+.message.friend-msg .box,
+.message.my-msg .box {
+    background-color: #f3f3f5;
+    color: $black;
+}
+
+a.download {
+    text-decoration: none;
+
+}
+
+.box .message-content {
+    display: flex;
+    align-items: center;
+}
+
+.icon {
+    width: 40px;
+}
+
+.box .message-times {
+    margin-top: 0;
+}
+
+.message.my-msg .box .message-times {
+    color: rgba($color: $black, $alpha: .4);
+}

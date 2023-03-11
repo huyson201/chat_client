@@ -55,6 +55,7 @@ export interface MessageItemContentProps {
     content: string | React.ReactNode,
     date: string | Date,
 }
+
 export const MessageItemContent = ({ content, date }: MessageItemContentProps) => {
     return (
         <div className={cx("box")}>

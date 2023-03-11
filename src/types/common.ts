@@ -25,3 +25,12 @@ export interface LinkReviewData {
     videos: string,
     favicons: string[]
 }
+
+
+export interface FileUploadResponse {
+    fileUrl: string,
+    original_filename: string,
+    resource_type: string,
+    format: string
+    filename: string,
+}

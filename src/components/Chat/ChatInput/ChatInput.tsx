@@ -1,4 +1,4 @@
-import React, { KeyboardEvent, MouseEvent, useRef, useState } from "react"
+import React, { ChangeEvent, KeyboardEvent, MouseEvent, useRef, useState } from "react"
 import ContentEditable, { ContentEditableEvent } from 'react-contenteditable'
 import bindClass from 'classnames/bind'
 import styles from './ChatInput.module.scss'
@@ -7,15 +7,18 @@ import data from '@emoji-mart/data'
 import Picker from '@emoji-mart/react'
 import { MdEmojiEmotions } from "react-icons/md"
 import { IoIosPaperPlane } from "react-icons/io"
+import commonApi from "@apis/common"
+import { FileUploadResponse } from "../../../types/common"
 
 const cx = bindClass.bind(styles)
 
 export interface ChatInputProps {
-    handleSendMsg?: (message: string) => void
+    handleSendMsg?: (message: string) => void,
+    handleSendFile?: (fileInfo: FileUploadResponse) => void
 }
 
 
-const ChatInput = ({ handleSendMsg }: ChatInputProps) => {
+const ChatInput = ({ handleSendMsg, handleSendFile }: ChatInputProps) => {
     const emojiPickerRef = useRef<HTMLDivElement>(null)
     const inputRef = useRef<HTMLDivElement>(null)
     const sendBtnRef = useRef<HTMLButtonElement>(null)
@@ -44,6 +47,17 @@ const ChatInput = ({ handleSendMsg }: ChatInputProps) => {
             inputRef.current.classList.add(cx("empty"))
         }
 
+    }
+
+    const handleOnchangeFile = (event: ChangeEvent<HTMLInputElement>) => {
+        if (!event.target.files || event.target.files.length === 0) return
+        let formData = new FormData()
+        formData.append("file", event.target.files[0])
+        commonApi.uploadFile(formData).then(res => {
+            if (handleSendFile) {
+                handleSendFile(res.data.data)
+            }
+        }).catch(err => console.log(err))
     }
 
     const handleClickEmoji = (e: MouseEvent) => {
@@ -75,7 +89,7 @@ const ChatInput = ({ handleSendMsg }: ChatInputProps) => {
     return (
         <div className={cx("send-message")} >
             <div className={cx("files")}>
-                <input type="file" name='file' hidden ref={inputFileRef} accept='.doc,.docx,.txt,.zip,.pdf,.rar' />
+                <input type="file" name='file' hidden ref={inputFileRef} accept='.doc,.docx,.txt,.zip,.pdf,.rar,.xlsx,.pptx,.txt' onChange={handleOnchangeFile} />
                 <button className={cx('btn-action', 'btn-attack-file')} onClick={() => inputFileRef.current?.click()}>
                     <ImAttachment />
                 </button>

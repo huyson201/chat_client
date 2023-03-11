@@ -14,7 +14,6 @@
     flex-direction: column;
     height: 100%;
     border-right: 1px solid $gray-100;
-    background-color: $gray-bg;
 }
 
 .welcome-box {
@@ -65,88 +64,8 @@
     border-radius: 5px;
 }
 
-.message {
-    display: flex;
-    width: 100%;
-    margin-bottom: 24px;
-}
-
-.message-box {
-    max-width: 70%;
-    min-width: 20%;
-
-}
-
-.sender {
-    font-size: 12px;
-    margin-bottom: 4px;
-    font-weight: 400;
-    margin-left: 4px;
-    color: rgba($color: $black, $alpha: .6);
-}
-
-.message.my-msg {
-    justify-content: flex-end;
-}
-
-.box {
-    padding: 6px 12px;
-}
-
-.message.friend-msg .box {
-    background-color: $white;
-    box-shadow: 1px 1px 4px rgba($color: $black, $alpha: .4);
-    border-top-left-radius: 10px;
-    border-top-right-radius: 10px;
-    border-bottom-right-radius: 10px;
-}
-
-.message.my-msg .box {
-    background-color: $red;
-    color: $white;
-    border-top-left-radius: 10px;
-    border-top-right-radius: 10px;
-    border-bottom-left-radius: 10px;
-
-}
-
-.message-content {
-    position: relative;
-    font-size: 14px;
-    font-weight: 600;
-    position: relative;
-}
 
 
-.message.friend-msg .message-content {
-    color: $black;
-    text-align: left;
-
-}
-
-
-.message-times {
-    font-size: 12px;
-    color: rgba($color: $black, $alpha: .4);
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    margin-top: 12px;
-}
-
-
-
-
-.message.my-msg .message-times {
-    justify-content: flex-end;
-    color: $gray-100;
-    // margin-right: 26px;
-
-}
-
-.message.my-msg .message-times .clock {
-    order: 2;
-}
 
 .loader {
     display: flex;

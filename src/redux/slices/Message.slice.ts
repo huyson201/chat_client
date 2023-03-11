@@ -28,7 +28,7 @@ export const socketSlice = createSlice({
     initialState,
     reducers: {
         setMessages: (state, action: PayloadAction<MessagesData>) => {
-            state.messages = action.payload.messages?.reverse() || null
+            state.messages = action.payload.messages || null
             state.conversationId = action.payload.conversationId
         },
         addMessage: (state, action: PayloadAction<MessageType>) => {
