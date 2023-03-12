@@ -11,6 +11,9 @@ const friendApis = {
             recipientId,
             request_text
         })
+    },
+    updateRequestFriend: (requestId: string, status: "accepted" | "rejected") => {
+        return axiosInstance.put(`friends/requests/${requestId}`, { status })
     }
 }
 

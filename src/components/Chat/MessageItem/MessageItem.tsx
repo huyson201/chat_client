@@ -10,7 +10,6 @@ export interface MessageItemProps {
     message: MessageType
 }
 import LinkPreview from '../LinkPreview/LinkPreview'
-// import ReactTinyLink from 'react-tiny-link';  
 import * as linkify from "linkifyjs";
 import { MessageType } from '../../../types/Message';
 import { BsClock } from 'react-icons/bs';

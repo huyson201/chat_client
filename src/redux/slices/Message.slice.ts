@@ -2,20 +2,23 @@ import { createSlice } from '@reduxjs/toolkit'
 import type { PayloadAction } from '@reduxjs/toolkit'
 import { Socket } from 'socket.io-client'
 import { MessageType } from '../../types/Message'
+import { fetchMessages } from '@redux/thunks/Message.thunk'
 
 // Define a type for the slice state
 interface MessageState {
     conversationId?: string
     messages: MessageType[] | null,
-    totalPages: number,
-    nextPage: number | null
+    status: "ide" | "loading" | "succeeded" | "failed",
+    error: any
+
 }
 
 // Define the initial state using that type
 const initialState: MessageState = {
     messages: null,
-    totalPages: 1,
-    nextPage: null
+    status: "ide",
+    error: null
+
 }
 
 interface MessagesData {
@@ -23,14 +26,10 @@ interface MessagesData {
     conversationId?: string,
 }
 
-export const socketSlice = createSlice({
+export const messageSlice = createSlice({
     name: 'message',
     initialState,
     reducers: {
-        setMessages: (state, action: PayloadAction<MessagesData>) => {
-            state.messages = action.payload.messages || null
-            state.conversationId = action.payload.conversationId
-        },
         addMessage: (state, action: PayloadAction<MessageType>) => {
             let newMessages
             if (state.messages) {
@@ -44,10 +43,24 @@ export const socketSlice = createSlice({
 
         }
 
-    }
+    },
+    extraReducers(builder) {
+        builder.addCase(fetchMessages.pending, (state) => {
+            state.status = "loading"
+        })
+        builder.addCase(fetchMessages.fulfilled, (state, action) => {
+            state.messages = action.payload
+            state.status = "succeeded"
+        })
+        builder.addCase(fetchMessages.rejected, (state, action) => {
+            state.status = "failed"
+            state.messages = null
+            state.error = action.payload
+        })
+    },
 })
 
-export const { setMessages, addMessage } = socketSlice.actions
+export const { addMessage } = messageSlice.actions
 
 
-export default socketSlice.reducer
+export default messageSlice.reducer

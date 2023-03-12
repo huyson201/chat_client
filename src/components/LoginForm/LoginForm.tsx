@@ -8,8 +8,9 @@ import { yupResolver } from '@hookform/resolvers/yup';
 import { useForm } from 'react-hook-form'
 import authApis from '@apis/auth.api'
 import { useAppDispatch, useAppSelector } from '@hooks/redux'
-import { login, loginFail, loginSuccess } from '@redux/slices/Auth.slice'
 import { Link, Navigate, useNavigate } from 'react-router-dom'
+import { loginAuth } from '@redux/thunks/auth.thunk'
+import { loginOauth } from '@redux/slices/Auth.slice'
 const cx = classBind.bind(styles)
 
 
@@ -38,18 +39,14 @@ const LoginForm = () => {
 
 
     const onSubmit = handleSubmit(async (data) => {
-        dispatch(login())
-        try {
-            let res = await authApis.login(data.email, data.password)
-            dispatch(loginSuccess(res.data.data))
+        dispatch(loginAuth({ email: data.email, password: data.password })).then(() => {
             navigate("/", { replace: true })
-        } catch (error) {
-            dispatch(loginFail())
-        }
+        })
+
     })
 
     const loginGoogle = () => {
-        dispatch(login())
+        dispatch(loginOauth())
         window.open("http://localhost:4000/api/auth/google", "_self")
     }
 

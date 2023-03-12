@@ -8,9 +8,10 @@ import bindClass from 'classnames/bind'
 import Input from '@components/Input/Input'
 import { FacebookButton, GoogleButton } from '@components/Button/Button'
 import authApis from '@apis/auth.api';
-import { login, loginFail, loginSuccess } from '@redux/slices/Auth.slice';
 import { Navigate, useNavigate } from 'react-router-dom';
 import { useAppDispatch, useAppSelector } from '@hooks/redux';
+import { registerAccount } from '@redux/thunks/auth.thunk';
+import { loginOauth } from '@redux/slices/Auth.slice';
 
 
 const validationSchema = yup.object({
@@ -27,7 +28,7 @@ const validationSchema = yup.object({
         .required("confirm password is required"),
 });
 
-interface RegisterFormType {
+export interface RegisterFormType {
     first_name: string
     last_name: string
     email: string
@@ -51,18 +52,14 @@ const RegisterForm = () => {
     }
 
     const onSubmit = handleSubmit(async (data) => {
-        dispatch(login())
-        try {
-            let res = await authApis.register(data)
-            dispatch(loginSuccess(res.data.data))
+        dispatch(registerAccount(data)).then(() => {
             navigate("/", { replace: true })
-        } catch (error) {
-            dispatch(loginFail())
-        }
+        })
+
     })
 
     const loginGoogle = () => {
-        dispatch(login())
+        dispatch(loginOauth())
         window.open("http://localhost:4000/api/auth/google", "_self")
     }
 

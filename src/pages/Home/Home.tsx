@@ -11,10 +11,9 @@ import { updateOnlineStatus } from "@redux/slices/Auth.slice";
 import { disconnectSocket, setSocket } from "@redux/slices/Socket.slice";
 import { addMessage } from "@redux/slices/Message.slice";
 import { MessageType } from "../../types/Message";
-import { updateLastMessage } from "@redux/slices/Conversation.slice";
+import { updateFriendOnlineState, updateLastMessage } from "@redux/slices/Conversation.slice";
 import { Outlet } from "react-router-dom";
 import List from "@components/List/List";
-// import ListItemContent from "@components/ListItemContent/ListItemContent";
 
 
 
@@ -24,9 +23,6 @@ const Home = () => {
   const auth = useAppSelector(state => state.auth)
   const currentChat = useAppSelector(state => state.chat.currentChat)
 
-  const handleFriendOnline = () => {
-
-  }
 
   useEffect(() => {
     if (auth.isLoggedIn) {
@@ -50,10 +46,15 @@ const Home = () => {
         dispatch(updateOnlineStatus(status))
       })
 
-      socket.on("friend_online", friendId => console.log("FriendOnline" + friendId))
+      socket.on("friend_online", ({ userId, onlineState }) => {
+        dispatch(updateFriendOnlineState({
+          userId,
+          onlineState
+        }))
+      })
+
 
       socket.on('connect_error', function (err) {
-        console.log(err.message);
 
         if (err.message === "Unauthorized") {
           return socket.disconnect()
@@ -94,10 +95,10 @@ const Home = () => {
       socket.on("receiveMessage", (msg: MessageType) => {
         if (currentChat && currentChat._id === msg.conversation) {
           dispatch(addMessage(msg))
-          dispatch(updateLastMessage({ conversationId: msg.conversation, lastMessage: { sender: msg.sender._id || msg.sender, content: msg.content } }))
+          dispatch(updateLastMessage({ conversationId: msg.conversation, lastMessage: { sender: msg.sender._id || msg.sender, content: msg.content, createdAt: msg.createdAt } }))
         }
         else {
-          dispatch(updateLastMessage({ conversationId: msg.conversation, lastMessage: { sender: msg.sender._id || msg.sender, content: msg.content } }))
+          dispatch(updateLastMessage({ conversationId: msg.conversation, lastMessage: { sender: msg.sender._id || msg.sender, content: msg.content, createdAt: msg.createdAt } }))
         }
       })
     }

@@ -1,16 +1,12 @@
 import React, { CSSProperties } from "react";
 import styles from "./LeftSide.module.scss";
 import bindClass from "classnames/bind";
-import avatar from "@assets/images/Userpic.jpg";
-import { AiFillHome, AiOutlineHome, AiOutlinePoweroff } from "react-icons/ai"
+import { AiOutlinePoweroff } from "react-icons/ai"
 import { HiOutlineUsers } from 'react-icons/hi2'
-import { BsBell } from 'react-icons/bs'
-import { FaUserFriends, FaBell } from 'react-icons/fa'
-import { GoSignOut } from 'react-icons/go'
+import { BsBell, BsChatText } from 'react-icons/bs'
 import { useAppDispatch, useAppSelector } from "@hooks/redux";
-import { Link, NavLink, useNavigate } from "react-router-dom";
-import authApis from "@apis/auth.api";
-import { logOut } from "@redux/slices/Auth.slice";
+import { NavLink, useNavigate } from "react-router-dom";
+import { logout } from "@redux/thunks/auth.thunk";
 const cx = bindClass.bind(styles);
 
 export interface CSSPropertiesWithVars extends CSSProperties {
@@ -22,13 +18,14 @@ const LeftSide = () => {
   const auth = useAppSelector(state => state.auth)
   const dispatch = useAppDispatch()
   const navigate = useNavigate()
+
   const handleLogout = () => {
-    authApis.logout()
+    dispatch(logout())
       .then(() => {
-        dispatch(logOut())
         navigate("/login", { replace: true })
       })
       .catch(err => console.log(err))
+
   }
 
   return (
@@ -40,7 +37,7 @@ const LeftSide = () => {
       <ul className={cx("side-menu")} style={{ '--pos': '1' } as CSSPropertiesWithVars}>
         <li>
           <NavLink to="/" className={({ isActive }) => (isActive === true) ? cx("side-menu__item", 'active', "icons") : cx("side-menu__item", "icons")}>
-            <AiOutlineHome />
+            <BsChatText />
           </NavLink>
         </li>
 

@@ -5,7 +5,6 @@ import ChatInput from './ChatInput/ChatInput'
 import ChatHeader from './ChatHeader/ChatHeader'
 import { useAppDispatch, useAppSelector } from '@hooks/redux'
 import conversationApi from '@apis/conversation.api'
-import { setMessages } from '@redux/slices/Message.slice'
 import { User } from '../../types/conversation'
 import { RotatingLines } from 'react-loader-spinner'
 import MessageItem from './MessageItem/MessageItem'
@@ -13,6 +12,9 @@ import chatImg from '@assets/images/group-chat.svg'
 import About from "@components/About/About";
 import { FileUploadResponse } from '../../types/common'
 import FileMessage from './FileMessage/FileMessage'
+import { fetchMessages } from '@redux/thunks/Message.thunk'
+import { setCurrentChatAndChat } from '@redux/slices/Chat.slice'
+import { addConversation } from '@redux/slices/Conversation.slice'
 
 const cx = bindClass.bind(styles)
 
@@ -55,18 +57,8 @@ const Chat = ({ clickRightSide }: ChatProps) => {
 
     //* load messages
     useEffect(() => {
-        if (chatConversation.currentChat) {
-            setShowMessageLoader(true)
-            conversationApi.getMessages(chatConversation.currentChat._id)
-                .then(res => {
-                    return dispatch(setMessages({
-                        conversationId: chatConversation.currentChat?._id,
-                        messages: res.data.data
-                    }))
-                })
-                .catch(err => console.log(err)).finally(() => {
-                    setShowMessageLoader(false)
-                })
+        if (chatConversation.currentChat && chatConversation.currentChat._id !== "") {
+            dispatch(fetchMessages({ conversationId: chatConversation.currentChat._id }))
         }
     }, [chatConversation.currentChat])
 
@@ -138,17 +130,37 @@ const Chat = ({ clickRightSide }: ChatProps) => {
 
 
     //* handle send message
-    const handleSendMsg = (message: string) => {
-        if (socket) {
+    const handleSendMsg = async (message: string) => {
+        if (!socket) return
+        if (chatConversation.currentChat?._id === "") {
+            conversationApi.createConversation({
+                name: "",
+                members: chatConversation.currentChat.members.map(mem => mem._id),
+                is_group: chatConversation.currentChat.is_group
+            }).then(res => {
+                dispatch(setCurrentChatAndChat(res.data.data))
+                dispatch(addConversation(res.data.data))
+                socket.emit("sendMessage", {
+                    conversation: res.data.data,
+                    sender: auth,
+                    message: message,
+                    to: receivers
+                })
+
+            })
+
+
+        } else {
             socket.emit("sendMessage", {
                 conversation: chatConversation.currentChat,
                 sender: auth,
                 message: message,
                 to: receivers
             })
-
-
         }
+
+
+
     }
 
     const handleSendFile = (fileInfo: FileUploadResponse) => {
@@ -169,7 +181,7 @@ const Chat = ({ clickRightSide }: ChatProps) => {
 
     //* generate list message
     const genMessages = () => {
-        if (messages.conversationId !== chatConversation.currentChat?._id) return
+        if (chatConversation.currentChat?._id === "") return
         return messages.messages?.map((message, index) => {
             let senderId = message.sender._id || message.sender
             let msgType: "my-msg" | "friend-msg" = senderId === auth?._id ? "my-msg" : "friend-msg"
@@ -181,7 +193,7 @@ const Chat = ({ clickRightSide }: ChatProps) => {
     }
 
 
-    if (!chatConversation.currentChat || !chatConversation.isChat) {
+    if (!chatConversation.isChat) {
         return (
             <div className={cx("welcome-box")}>
                 <div className={cx("welcome-title")}>

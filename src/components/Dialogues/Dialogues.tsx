@@ -1,14 +1,13 @@
-import React, { useEffect, useMemo } from 'react'
+import React, { ChangeEvent, useEffect, useMemo, useState } from 'react'
 import style from './Dialogues.module.scss'
 import bindClass from 'classnames/bind'
-import conversationApi from '@apis/conversation.api'
 import { useAppDispatch, useAppSelector } from '@hooks/redux'
-import { setConversation, setPendingConversation } from '@redux/slices/Conversation.slice'
 import { Link } from 'react-router-dom'
 import { ConversationType } from '../../types/conversation'
 import { setCurrentChatAndChat } from '@redux/slices/Chat.slice'
 import { BsSearch } from 'react-icons/bs'
 import { AiOutlineUserAdd, AiOutlineUsergroupAdd } from 'react-icons/ai'
+import { fetchConversations } from '@redux/thunks/conversation.thunk'
 const cx = bindClass.bind(style)
 
 export interface DialoguesProps {
@@ -19,22 +18,51 @@ const Dialogues = ({ onClickAddFriend }: DialoguesProps) => {
     const disPatch = useAppDispatch()
     const conversations = useAppSelector(state => state.conversation)
     const auth = useAppSelector(state => state.auth.profile)
+    const [searchConversations, setSearchConversations] = useState<ConversationType[]>()
 
     useEffect(() => {
-        disPatch(setPendingConversation(true))
-        conversationApi.getConversations()
-            .then(res => disPatch(setConversation(res.data.data)))
-            .finally(() => disPatch(setPendingConversation(false)))
+        disPatch(fetchConversations())
     }, [auth])
+
 
     const listConversation = useMemo(() => {
         if (!conversations.conversations) return null
+
         return conversations.conversations.map((conversation, index) => {
             return (
                 <DialoguesItem key={conversation._id} conversation={conversation} authId={auth?._id} onClick={() => disPatch(setCurrentChatAndChat(conversation))} />
             )
         })
     }, [conversations])
+
+    const genSearchConversations = useMemo(() => {
+        if (!searchConversations) return null
+        return searchConversations.map((conversation, index) => {
+            return (
+                <DialoguesItem key={conversation._id} conversation={conversation} authId={auth?._id} onClick={() => disPatch(setCurrentChatAndChat(conversation))} />
+            )
+        })
+    }, [searchConversations])
+
+
+    const handleSearch = (event: ChangeEvent<HTMLInputElement>) => {
+        let searchKey = event.target.value
+        if (!conversations.conversations) return null
+
+        let searchList = conversations.conversations.filter(conversation => {
+            if (conversation.is_group) {
+                return conversation.name?.toLocaleLowerCase().includes(searchKey.toLowerCase())
+            }
+
+            let currentMember = conversation.members.find(member => member._id !== auth?._id)
+            return `${currentMember?.first_name} ${currentMember?.last_name}`.toLowerCase().includes(searchKey.toLowerCase())
+
+        })
+
+        setSearchConversations([...searchList])
+    }
+
+
 
     return (
         <div className={cx('dialogues')}>
@@ -43,7 +71,7 @@ const Dialogues = ({ onClickAddFriend }: DialoguesProps) => {
                 <div className={cx("header-actions")}>
                     <div className={cx("search")}>
                         <div className={cx("search-icon")}><BsSearch /></div>
-                        <input type="text" placeholder='Enter for search...' />
+                        <input type="text" placeholder='Enter for search...' onChange={handleSearch} />
                     </div>
                     <button className={cx("btn-add_friend", "btn")} onClick={onClickAddFriend}>
                         <AiOutlineUserAdd />
@@ -55,7 +83,7 @@ const Dialogues = ({ onClickAddFriend }: DialoguesProps) => {
             </div>
 
             <div className={cx("dialogues-list")}>
-                {listConversation && listConversation}
+                {genSearchConversations ? genSearchConversations : listConversation}
             </div>
         </div>
     )
